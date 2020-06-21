@@ -9,14 +9,12 @@ public func configure(_ app: Application) throws {
     // Load enviroment if any
     Environment.dotenv()
     
-    try app.databases.use(.postgres(url: Environment.databaseURL), as: .psql)
+    var config = PostgresConfiguration(url: Environment.get("DATABASE_URL")!)!
+    config.tlsConfiguration = TLSConfiguration.forClient(certificateVerification: .none)
+    app.databases.use(.postgres(configuration: config), as: .psql)
 
     app.migrations.add(CreateSubject())
     app.migrations.add(CreateDetail())
-
-    if app.environment == .development {
-        try app.autoMigrate().wait()
-    }
 
     // register routes
     try routes(app)
