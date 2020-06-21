@@ -9,7 +9,7 @@ public func configure(_ app: Application) throws {
     // Load enviroment if any
     Environment.dotenv()
     
-    var config = PostgresConfiguration(url: Environment.get("DATABASE_URL")!)!
+    var config = PostgresConfiguration(url: Environment.databaseURL)!
     config.tlsConfiguration = TLSConfiguration.forClient(certificateVerification: .none)
     app.databases.use(.postgres(configuration: config), as: .psql)
 
