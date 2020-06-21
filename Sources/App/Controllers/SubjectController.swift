@@ -23,14 +23,11 @@ struct SubjectController: RouteCollection {
     }
     
     func generateSubjects(req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        Subject.query(on: req.db).delete()
-        Detail.query(on: req.db).delete()
-        
         let studievejleder = Subject(
             id: UUID(uuidString: "4cb7fc63-9403-4961-9760-0bce49ad6fca"),
             parentID: nil,
             text: "Studievejleder",
-            iconURL: iconPath(with: req, name: "ic_counselor")
+            iconURL: iconPath(name: "ic_counselor")
         )
         
         let støtte_under_uddannelse = Subject(
@@ -143,31 +140,34 @@ struct SubjectController: RouteCollection {
             videoLinkURLs: nil
         )
         
-        return studievejleder.save(on: req.db).map { studievejleder }.flatMap { _ in
-            return støtte_under_uddannelse.save(on: req.db).map { støtte_under_uddannelse }.flatMap { _ in
-                return gymnasieuddannelse.save(on: req.db).map { gymnasieuddannelse }.flatMap { s -> EventLoopFuture<Subject> in
-                    studietur.save(on: req.db).map { studietur }.flatMap { s -> EventLoopFuture<Subject> in
-                        return studieturDetalje.save(on: req.db).map { s }
-                    }
-                    støttetimer.save(on: req.db).map { støttetimer }.flatMap { s -> EventLoopFuture<Subject> in
-                        return støttetimerDetalje.save(on: req.db).map { s }
-                    }
-                    fritagelseForIdrætC.save(on: req.db).map { fritagelseForIdrætC }.flatMap { s -> EventLoopFuture<Subject> in
-                        return fritagelseForIdrætCDetalje.save(on: req.db).map { s }
-                    }
-                    udvidelseAfUddannelse.save(on: req.db).map { udvidelseAfUddannelse }.flatMap { s -> EventLoopFuture<Subject> in
-                        return udvidelseAfUddannelseDetalje.save(on: req.db).map { s }
-                    }
-                    syge_supplerende_undervisning.save(on: req.db).map { syge_supplerende_undervisning }.flatMap { s -> EventLoopFuture<Subject> in
-                        return syge_supplerende_undervisningDetalje.save(on: req.db).map { s }
-                    }
-                    return eksamen.save(on: req.db).map { eksamen }.flatMap { s -> EventLoopFuture<Subject> in
-                        return eksamenDetalje.save(on: req.db).map { s }
+        return Detail.query(on: req.db).delete().flatMap { _ in
+            return Subject.query(on: req.db).delete()
+        }.flatMap { _ in
+            return studievejleder.save(on: req.db).map { studievejleder }.flatMap { _ in
+                return støtte_under_uddannelse.save(on: req.db).map { støtte_under_uddannelse }.flatMap { _ in
+                    return gymnasieuddannelse.save(on: req.db).map { gymnasieuddannelse }.flatMap { s -> EventLoopFuture<Subject> in
+                        studietur.save(on: req.db).map { studietur }.flatMap { s -> EventLoopFuture<Subject> in
+                            return studieturDetalje.save(on: req.db).map { s }
+                        }
+                        støttetimer.save(on: req.db).map { støttetimer }.flatMap { s -> EventLoopFuture<Subject> in
+                            return støttetimerDetalje.save(on: req.db).map { s }
+                        }
+                        fritagelseForIdrætC.save(on: req.db).map { fritagelseForIdrætC }.flatMap { s -> EventLoopFuture<Subject> in
+                            return fritagelseForIdrætCDetalje.save(on: req.db).map { s }
+                        }
+                        udvidelseAfUddannelse.save(on: req.db).map { udvidelseAfUddannelse }.flatMap { s -> EventLoopFuture<Subject> in
+                            return udvidelseAfUddannelseDetalje.save(on: req.db).map { s }
+                        }
+                        syge_supplerende_undervisning.save(on: req.db).map { syge_supplerende_undervisning }.flatMap { s -> EventLoopFuture<Subject> in
+                            return syge_supplerende_undervisningDetalje.save(on: req.db).map { s }
+                        }
+                        return eksamen.save(on: req.db).map { eksamen }.flatMap { s -> EventLoopFuture<Subject> in
+                            return eksamenDetalje.save(on: req.db).map { s }
+                        }
                     }
                 }
-            }
-        }.transform(to: .noContent)
-        
+            }.transform(to: .noContent)
+        }
 //        let gymnasieuddannelse = Subject(id: UUID(uuidString: "6c7efa45-07ba-418a-89f6-c0f7ea184174"), parentID: UUID(uuidString: "9c9e5061-bce2-4bef-962f-d24e745dd09f"), text: "Gymnasieuddanelse", iconURL: "URL here")
 //
 //        let goderåd = Subject(id: UUID(uuidString: "b7c08d4c-5b83-4a5c-99fe-f98dda5e5ede"), parentID: UUID(uuidString: "4cb7fc63-9403-4961-9760-0bce49ad6fca"), text: "Gode råd", iconURL: "URL here")
@@ -183,7 +183,7 @@ struct SubjectController: RouteCollection {
 //        studietur.$details.create([studieturDetalje], on: req.db)
     }
     
-    private func iconPath(with req: Request, name: String, and ext: String = ".png") -> String {
-        "\(req.application.http.server.configuration.hostname):\(req.application.http.server.configuration.port)/icons/\(name)\(ext)"
+    private func iconPath(name: String, and ext: String = ".png") -> String {
+        "icons/\(name)\(ext)"
     }
 }
