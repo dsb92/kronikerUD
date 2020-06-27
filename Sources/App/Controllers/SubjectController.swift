@@ -40,7 +40,8 @@ struct SubjectController: RouteCollection {
             id: UUID(uuidString: "4cb7fc63-9403-4961-9760-0bce49ad6fca"),
             parentID: nil,
             text: "Studievejleder",
-            iconURL: iconPath(name: "ic_counselor")
+            iconURL: iconPath(name: "ic_counselor"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         return studievejleder.save(on: req.db).map { studievejleder }.flatMap { _ in
@@ -62,7 +63,8 @@ struct SubjectController: RouteCollection {
             id: UUID(uuidString: "9c9e5061-bce2-4bef-962f-d24e745dd09f"),
             parentID: parentID,
             text: "Støtte under uddannelse",
-            iconURL: iconPath(name: "ic_supporthours_and_aids")
+            iconURL: iconPath(name: "ic_supporthours_and_aids"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         return støtte_under_uddannelse.save(on: req.db).map { støtte_under_uddannelse }.flatMap { _ in
@@ -86,7 +88,8 @@ struct SubjectController: RouteCollection {
             id: UUID(uuidString: "a0a24557-c753-4916-ac79-7225522203b3"),
             parentID: parentID,
             text: "Gode råd",
-            iconURL: iconPath(name: "ic_good_advice")
+            iconURL: iconPath(name: "ic_good_advice"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let gode_råd_detalje = Detail(
@@ -124,7 +127,8 @@ struct SubjectController: RouteCollection {
             id: UUID(uuidString: "6bd18b8d-c9f4-451f-8a02-f0cd9c6a4a03"),
             parentID: parentID,
             text: "Erhvervsuddannelse",
-            iconURL: iconPath(name: "ic_secondary_school")
+            iconURL: iconPath(name: "ic_secondary_school"),
+            backgroundColor: "#A5C9DD"
         )
         
         return erhvervsuddannelse.save(on: req.db).map { erhvervsuddannelse }.flatMap { s -> EventLoopFuture<Subject> in
@@ -144,7 +148,8 @@ struct SubjectController: RouteCollection {
             id: UUID(uuidString: "2752ff0d-896c-46ca-8496-8225f7f0b3a0"),
             parentID: parentID,
             text: "Videregående uddannelse",
-            iconURL: iconPath(name: "ic_secondary_school")
+            iconURL: iconPath(name: "ic_secondary_school"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         return videregåendeuddannelse.save(on: req.db).map { videregåendeuddannelse }.flatMap { s -> EventLoopFuture<Subject> in
@@ -164,7 +169,8 @@ struct SubjectController: RouteCollection {
             id: UUID(uuidString: "6c7efa45-07ba-418a-89f6-c0f7ea184174"),
             parentID: parentID,
             text: "Gymnasieuddanelse",
-            iconURL: iconPath(name: "ic_secondary_school")
+            iconURL: iconPath(name: "ic_secondary_school"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         return gymnasieuddannelse.save(on: req.db).map { gymnasieuddannelse }.flatMap { s -> EventLoopFuture<Subject> in
@@ -184,42 +190,48 @@ struct SubjectController: RouteCollection {
             id: UUID(uuidString: "485d887b-d262-4163-82ab-eeaf365725f6"),
             parentID: parentID,
             text: "Studietur",
-            iconURL: iconPath(name: "ic_study_trip")
+            iconURL: iconPath(name: "ic_study_trip"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let gymnasieuddannelse_støttetimer = Subject(
             id: UUID(uuidString: "8b779e05-82e7-46fb-a7a9-e8e5c870ddd5"),
             parentID: parentID,
             text: "Støttetimer",
-            iconURL: iconPath(name: "ic_supporthours_and_aids")
+            iconURL: iconPath(name: "ic_supporthours_and_aids"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let gymnasieuddannelse_fritagelseForIdrætC = Subject(
             id: UUID(uuidString: "70f60599-e586-45a5-9495-af73e6429f9f"),
             parentID: parentID,
             text: "Fritagelse for idræt C",
-            iconURL: iconPath(name: "ic_exemption_from_sports")
+            iconURL: iconPath(name: "ic_exemption_from_sports"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let gymnasieuddannelse_udvidelseAfUddannelse = Subject(
             id: UUID(uuidString: "5950e98d-0c52-4683-abcc-41d9d990101c"),
             parentID: parentID,
             text: "Udvidelse af uddannelse",
-            iconURL: iconPath(name: "ic_extending_education")
+            iconURL: iconPath(name: "ic_extending_education"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let gymnasieuddannelse_syge_supplerende_undervisning = Subject(
             id: UUID(uuidString: "3ab2d681-e8a0-442c-9985-30e7f70b5509"),
             parentID: parentID,
             text: "Syge / Supplerende undervisning",
-            iconURL: iconPath(name: "ic_sick_or_supplementary_education")
+            iconURL: iconPath(name: "ic_sick_or_supplementary_education"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let gymnasieuddannelse_eksamen = Subject(
             id: UUID(uuidString: "5be5b25a-ef3d-4859-9e6a-eec5ba7ffcef"),
             parentID: parentID,
             text: "Eksamen",
-            iconURL: iconPath(name: "ic_examination_counselor")
+            iconURL: iconPath(name: "ic_examination_counselor"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let gymnasieuddannelse_studietur_detalje = Detail(
@@ -308,49 +320,56 @@ struct SubjectController: RouteCollection {
             id: UUID(uuidString: "b97d02f9-d971-4eb1-840e-484c31b91130"),
             parentID: parentID,
             text: "Ekstra undervisning",
-            iconURL: iconPath(name: "ic_extra_teaching")
+            iconURL: iconPath(name: "ic_extra_teaching"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let erhvervsuddannelse_udvidelse_af_uddannelse = Subject(
             id: UUID(uuidString: "3d83ada0-b19e-4f26-bed5-93b526f66937"),
             parentID: parentID,
             text: "Udvidelse af uddannelse",
-            iconURL: iconPath(name: "ic_extending_education")
+            iconURL: iconPath(name: "ic_extending_education"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let erhvervsuddannelse_støtte_timer_hjælpemidler = Subject(
             id: UUID(uuidString: "4d4745bf-d50b-4d86-8152-2986d7745a6b"),
             parentID: parentID,
             text: "Støttetimer/hjælpemidler",
-            iconURL: iconPath(name: "ic_supporthours_and_aids")
+            iconURL: iconPath(name: "ic_supporthours_and_aids"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let erhvervsuddannelse_eksamen = Subject(
             id: UUID(uuidString: "717b9711-55d2-4802-ba0e-7d4d655a4047"),
             parentID: parentID,
             text: "Eksamen",
-            iconURL: iconPath(name: "ic_examination_counselor")
+            iconURL: iconPath(name: "ic_examination_counselor"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let erhvervsuddannelse_revalidering = Subject(
             id: UUID(uuidString: "4d2bc06d-35cb-4efb-94b3-aae8236a7b43"),
             parentID: parentID,
             text: "Revalidering",
-            iconURL: iconPath(name: "ic_rehabiliation")
+            iconURL: iconPath(name: "ic_rehabiliation"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let erhvervsuddannelse_handicap_tillæg = Subject(
             id: UUID(uuidString: "174ccd2a-245f-4a22-a1ef-95c49b2aa4a7"),
             parentID: parentID,
             text: "Handicap tillæg",
-            iconURL: iconPath(name: "ic_handicap_supplement")
+            iconURL: iconPath(name: "ic_handicap_supplement"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let erhvervsuddannelse_praktik = Subject(
             id: UUID(uuidString: "20047a0d-6e54-4778-84e5-e8f183ff855d"),
             parentID: parentID,
             text: "Praktik",
-            iconURL: iconPath(name: "ic_internship")
+            iconURL: iconPath(name: "ic_internship"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let erhvervsuddannelse_ekstra_undervisning_detalje = Detail(
@@ -463,35 +482,40 @@ struct SubjectController: RouteCollection {
             id: UUID(uuidString: "8408ae98-a5cb-46a9-b9f4-8f177b0d99be"),
             parentID: parentID,
             text: "Orlov",
-            iconURL: iconPath(name: "ic_sick_or_supplementary_education")
+            iconURL: iconPath(name: "ic_sick_or_supplementary_education"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let videregåendeuddannelse_støtte_timer_hjælpemidler = Subject(
             id: UUID(uuidString: "9eeceab0-423a-4ebe-a35a-e930f95e62dc"),
             parentID: parentID,
             text: "Støttetimer/hjælpemidler",
-            iconURL: iconPath(name: "ic_supporthours_and_aids")
+            iconURL: iconPath(name: "ic_supporthours_and_aids"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let videregåendeuddannelse_praktik = Subject(
             id: UUID(uuidString: "f613fc30-ba69-4ccc-a570-093e541cee14"),
             parentID: parentID,
             text: "Praktik",
-            iconURL: iconPath(name: "ic_internship")
+            iconURL: iconPath(name: "ic_internship"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let videregåendeuddannelse_handicap_tillæg = Subject(
             id: UUID(uuidString: "e10b224c-c248-45b6-b09e-2dfd2f2dcfed"),
             parentID: parentID,
             text: "Handicap tillæg",
-            iconURL: iconPath(name: "ic_handicap_supplement")
+            iconURL: iconPath(name: "ic_handicap_supplement"),
+            backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let videregåendeuddannelse_revalidering = Subject(
              id: UUID(uuidString: "6e2dbaf5-ab74-47a2-978b-294d41d3642b"),
              parentID: parentID,
              text: "Revaldering",
-             iconURL: iconPath(name: "ic_rehabiliation")
+             iconURL: iconPath(name: "ic_rehabiliation"),
+             backgroundColor: ColorPalette.lightSteelBlue.hexColor
         )
         
         let videregåendeuddannelse_orlov_detalje = Detail(

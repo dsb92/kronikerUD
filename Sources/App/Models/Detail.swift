@@ -7,20 +7,20 @@ final class Detail: Model, Content {
     @ID(key: .id)
     var id: UUID?
 
-    @Field(key: "html_text")
-    var htmlText: String?
-    
-    @Field(key: "button_link_url")
-    var buttonLinkURL: String?
-    
-    @Field(key: "swipeable_texts")
-    var swipeableTexts: [String]?
-    
-    @Field(key: "video_link_urls")
-    var videoLinkURLs: [String]?
-    
     @Parent(key: "subject_id")
     var subject: Subject
+    
+    @OptionalField(key: "html_text")
+    var htmlText: String?
+    
+    @OptionalField(key: "button_link_url")
+    var buttonLinkURL: String?
+    
+    @OptionalField(key: "swipeable_texts")
+    var swipeableTexts: [String]?
+    
+    @OptionalField(key: "video_link_urls")
+    var videoLinkURLs: [String]?
 
     init() { }
 

@@ -11,8 +11,12 @@ public func configure(_ app: Application) throws {
     
     try app.databases.use(.postgres(url: Environment.databaseURL), as: .psql)
     
+    // Tables
     app.migrations.add(CreateSubject())
     app.migrations.add(CreateDetail())
+    
+    // Fields
+    app.migrations.add(SubjectAddBackgroundColor(), to: .psql)
 
     // register routes
     try routes(app)
