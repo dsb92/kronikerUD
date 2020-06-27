@@ -15,19 +15,22 @@ struct SubjectController: RouteCollection {
                 subject
                     .with(\.$details)
                     .with(\.$subjects) { subject in
-                        subject
-                            .with(\.$subjects) { subject in
+                        subject.with(\.$details)
+                        subject.with(\.$subjects) { subject in
                                 subject.with(\.$details)
                         }
-                }
-        }.all()
+                    }
+            }
+        .all()
     }
     
     func generateSubjects(req: Request) throws -> EventLoopFuture<HTTPStatus> {
         return Detail.query(on: req.db).delete().flatMap { _ in
             return Subject.query(on: req.db).delete()
         }.flatMap { _ in
-            return self.generateStudievejleder(req: req).transform(to: .noContent)
+            return self.generateStudievejleder(req: req).flatMap { _ in
+                return self.generateStuderende(req: req)
+            }.transform(to: .noContent)
         }
     }
     
@@ -37,7 +40,7 @@ struct SubjectController: RouteCollection {
     
     private func generateStudievejleder(req: Request) -> EventLoopFuture<Subject> {
         let studievejleder = Subject(
-            id: UUID(uuidString: "4cb7fc63-9403-4961-9760-0bce49ad6fca"),
+            id: UUID(),
             parentID: nil,
             text: "Studievejleder",
             iconURL: iconPath(name: "ic_counselor"),
@@ -45,32 +48,52 @@ struct SubjectController: RouteCollection {
         )
         
         return studievejleder.save(on: req.db).map { studievejleder }.flatMap { _ in
-            return self.generateStudievejlederStøtteUnderUddannelse(req: req, studievejleder: studievejleder).flatMap { _ in
+            return self.generateStøtteUnderUddannelse(req: req, color: .lightSteelBlue, subject: studievejleder).flatMap { _ in
                 return self.generateStudievejlederGoderåd(req: req, studievejleder: studievejleder)
             }
         }
     }
     
-    private func generateStudievejlederStøtteUnderUddannelse(req: Request, studievejleder: Subject) -> EventLoopFuture<Subject> {
+    private func generateStuderende(req: Request) -> EventLoopFuture<Subject> {
+        let studerende = Subject(
+            id: UUID(),
+            parentID: nil,
+            text: "Studerende",
+            iconURL: iconPath(name: "ic_student"),
+            backgroundColor: ColorPalette.lightGreen.hexColor
+        )
+        
+        return studerende.save(on: req.db).map { studerende }.flatMap { _ in
+            return self.generateStøtteUnderUddannelse(req: req, color: .lightGreen, subject: studerende).flatMap { _ in
+                return self.generateStuderendeGoderåd(req: req, studerende: studerende).flatMap { _ in
+                    return self.generateStuderendeMindfulness(req: req, studerende: studerende).flatMap { _ in
+                        return self.generateStuderendeChatforum(req: req, studerende: studerende)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func generateStøtteUnderUddannelse(req: Request, color: ColorPalette, subject: Subject) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
-            parentID = try studievejleder.requireID()
+            parentID = try subject.requireID()
         } catch {
             print(error.localizedDescription)
         }
         
         let støtte_under_uddannelse = Subject(
-            id: UUID(uuidString: "9c9e5061-bce2-4bef-962f-d24e745dd09f"),
+            id: UUID(),
             parentID: parentID,
             text: "Støtte under uddannelse",
             iconURL: iconPath(name: "ic_supporthours_and_aids"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         return støtte_under_uddannelse.save(on: req.db).map { støtte_under_uddannelse }.flatMap { _ in
-            return self.generateStudievejlederStøtteUnderUddannelseGymnasieUddannelse(req: req, støtte_under_uddannelse: støtte_under_uddannelse).flatMap { _ in
-                return self.generateStudievejlederStøtteUnderUddannelseErhvervsUddannelse(req: req, støtte_under_uddannelse: støtte_under_uddannelse).flatMap { _ in
-                    return self.generateStudievejlederStøtteUnderUddannelseVideregåendeUddannelse(req: req, støtte_under_uddannelse: støtte_under_uddannelse)
+            return self.generateStøtteUnderUddannelseGymnasieUddannelse(req: req, color: color, støtte_under_uddannelse: støtte_under_uddannelse).flatMap { _ in
+                return self.generateStøtteUnderUddannelseErhvervsUddannelse(req: req, color: color, støtte_under_uddannelse: støtte_under_uddannelse).flatMap { _ in
+                    return self.generateStøtteUnderUddannelseVideregåendeUddannelse(req: req, color: color, støtte_under_uddannelse: støtte_under_uddannelse)
                 }
             }
         }
@@ -85,7 +108,7 @@ struct SubjectController: RouteCollection {
         }
         
         let gode_råd = Subject(
-            id: UUID(uuidString: "a0a24557-c753-4916-ac79-7225522203b3"),
+            id: UUID(),
             parentID: parentID,
             text: "Gode råd",
             iconURL: iconPath(name: "ic_good_advice"),
@@ -93,8 +116,8 @@ struct SubjectController: RouteCollection {
         )
         
         let gode_råd_detalje = Detail(
-            id: UUID(uuidString: "edabcd58-193c-411a-a276-2cf0caa4a956"),
-            subjectID: UUID(uuidString: "a0a24557-c753-4916-ac79-7225522203b3")!,
+            id: UUID(),
+            subjectID: gode_råd.id!,
             htmlText: nil,
             buttonLinkURL: nil,
             swipeableTexts: [
@@ -115,7 +138,161 @@ struct SubjectController: RouteCollection {
         }
     }
     
-    private func generateStudievejlederStøtteUnderUddannelseErhvervsUddannelse(req: Request, støtte_under_uddannelse: Subject) -> EventLoopFuture<Subject> {
+    private func generateStuderendeGoderåd(req: Request, studerende: Subject) -> EventLoopFuture<Subject> {
+        var parentID: UUID? = nil
+        do {
+            parentID = try studerende.requireID()
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+        let gode_råd = Subject(
+            id: UUID(),
+            parentID: parentID,
+            text: "Gode råd",
+            iconURL: iconPath(name: "ic_good_advice"),
+            backgroundColor: ColorPalette.lightGreen.hexColor
+        )
+        
+        let gode_råd_detalje = Detail(
+            id: UUID(),
+            subjectID: gode_råd.id!,
+            htmlText: nil,
+            buttonLinkURL: nil,
+            swipeableTexts: [
+                "Det kan være en hjælp for dig at være åben omkring din diagnose og dine behov. Det kan være svært at fortælle en hel klasse omkring så private ting, men prøv at starte med din studiegruppe. Det at være åben omkring din situation kan hjælpe dine medstuderende til at forstå din situation og hjælpe dig med noter, støtte og forståelse.",
+                "Prøv at strukturerer din hverdag. Lav prioriteringer i hvad der er vigtigt og hvad der kan vente eller undlades i forhold til både skolearbejde samt dagligdag. Afsæt tid til at lade batterierne op ved enten at slappe af eller sætte tid af til de aktiviteter der giver dig glæde og energi.",
+                "Lav en liste over ting/aktiviteter der er vigtige for dig og som giver dig energi. Dette kan være med til at sætte fokus på små som store ting, der kan hjælpe dig med at lade batterierne op og holde balance i hverdagen. Afprøv eventuelt mindfulness, som du kan finde øvelser til her i appen.",
+                "Hvis din skole har et pauserum, så gør brug af det i løbet af dagen til at ligge dig ned og slappe af så du kan fortsætte med fornyet energi.",
+                "Gør brug af studievejleder og andet hjælp som skolen tilbyder - se evt. de rettigheder du har under Støtte under uddannelse her i appen.",
+                "Undersøg om der er en forening i forhold til din diagnose, du kan blive medlem af. Gennem foreningerne kan du få informationer omkring arrangementer, og evt. få dig et netværk med andre der har den samme sygdom.",
+                "Mange kronisk syge oplever, at det er godt at have et stærkt netværk bag sig i form af familie, venner mm. Der er mulighed for at opbygge et netværk via foreninger eller i chatforummet her i appen.",
+                "Husk at du ikke er din sygdom, men at du har en sygdom. Du skal leve med den men den er ikke din identitet."
+            ],
+            videoLinkURLs: nil
+        )
+        
+        return gode_råd.save(on: req.db).map { gode_råd }.flatMap { s -> EventLoopFuture<Subject> in
+            return gode_råd_detalje.save(on: req.db).map { s }
+        }
+    }
+    
+    private func generateStuderendeMindfulness(req: Request, studerende: Subject) -> EventLoopFuture<Subject> {
+        var parentID: UUID? = nil
+        do {
+            parentID = try studerende.requireID()
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+        let mindfulness = Subject(
+            id: UUID(),
+            parentID: parentID,
+            text: "Mindfulness",
+            iconURL: iconPath(name: "ic_mindfulness"),
+            backgroundColor: ColorPalette.lightGreen.hexColor
+        )
+        
+        return mindfulness.save(on: req.db).map { mindfulness }.flatMap { _ in
+            return self.generateStuderendeMindfulnessInformation(req: req, mindfulness: mindfulness).flatMap { _ in
+                return self.generateStuderendeMindfulnessExercises(req: req, mindfulness: mindfulness)
+            }
+        }
+    }
+    
+    private func generateStuderendeMindfulnessInformation(req: Request, mindfulness: Subject) -> EventLoopFuture<Subject> {
+        var parentID: UUID? = nil
+        do {
+            parentID = try mindfulness.requireID()
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+        let mindfulness_information = Subject(
+            id: UUID(),
+            parentID: parentID,
+            text: "Hvorfor mindfulness",
+            iconURL: iconPath(name: "ic_mindfulness_info"),
+            backgroundColor: ColorPalette.lightGreen.hexColor
+        )
+        
+        let mindfulness_information_detalje = Detail(
+            id: UUID(),
+            subjectID: mindfulness_information.id!,
+            htmlText: "Mindfulness er en meditationsform som kan hjælpe dig til at blive mere tilstede i dit liv lige nu og her. Det hjælper dig til at fokusere på det der er lige nu, og ikke det der har været eller det der kommer i morgen eller længere ud i fremtiden.\n\nMindfulness udøves på en måde hvor du er venlig mod dig selv og ikke er negativ overfor den måde du har det og det du tænker på. Du ser på dig selv med positive briller.\n\nI mindfulness arbejder du med din opmærksomhed. Du noterer det der dukker op fra øjeblik til øjeblik og accepterer det der er. Man tager det til sig uanset hvad det er, også selvom det er noget man ikke nødvendigvis kan lide.\n\nUnder meditationen vil du helt sikkert opleve at din koncentration bevæger sig et andet sted hen og at dine tanker flyder. Når du opdager det, tager du koncentrationen tilbage til meditationen. Det kan være svært, men du kan ikke gøre noget forkert. Det er helt normalt at koncentrationen skifter fokus og det vigtigste er at du ikke dømmer dig selv.",
+            buttonLinkURL: nil,
+            swipeableTexts: nil,
+            videoLinkURLs: nil
+        )
+        
+        return mindfulness_information.save(on: req.db).map { mindfulness_information }.flatMap { s -> EventLoopFuture<Subject> in
+            return mindfulness_information_detalje.save(on: req.db).map { s }
+        }
+    }
+    
+    private func generateStuderendeMindfulnessExercises(req: Request, mindfulness: Subject) -> EventLoopFuture<Subject> {
+        var parentID: UUID? = nil
+        do {
+            parentID = try mindfulness.requireID()
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+        let mindfulness_exercises = Subject(
+            id: UUID(),
+            parentID: parentID,
+            text: "Øvelser",
+            iconURL: iconPath(name: "ic_mindfulness_exercises"),
+            backgroundColor: ColorPalette.lightGreen.hexColor
+        )
+        
+        let mindfulness_exercises_detalje = Detail(
+            id: UUID(),
+            subjectID: mindfulness_exercises.id!,
+            htmlText: nil,
+            buttonLinkURL: nil,
+            swipeableTexts: nil,
+            videoLinkURLs: [
+                "https://www.youtube.com/watch?v=aKUU5_H6H3c",
+                "https://www.youtube.com/watch?v=i7RNkHI7d8Y"
+            ]
+        )
+        
+        return mindfulness_exercises.save(on: req.db).map { mindfulness_exercises }.flatMap { s -> EventLoopFuture<Subject> in
+            return mindfulness_exercises_detalje.save(on: req.db).map { s }
+        }
+    }
+    
+    private func generateStuderendeChatforum(req: Request, studerende: Subject) -> EventLoopFuture<Subject> {
+        var parentID: UUID? = nil
+        do {
+            parentID = try studerende.requireID()
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+        let chatforum = Subject(
+            id: UUID(),
+            parentID: parentID,
+            text: "Chatforum",
+            iconURL: iconPath(name: "ic_chatforum"),
+            backgroundColor: ColorPalette.lightGreen.hexColor
+        )
+        
+        let chatforum_detail = Detail(
+            id: UUID(),
+            subjectID: chatforum.id!,
+            htmlText: "Her i chatten har du mulighed for at chatte, oprette et netværk med andre kronisk syge, som enten er under uddannelse, eller som gerne vil starte på en uddannelse. Chatten vil for dig være muligheden for at skabe dig et nyt netværk, spare med andre kronisk syge med studerende, samt stille spørgsmål til din studievejleder. Selve chatten fungerer på den måde, at du optræder som en anonym bruger, dog er der lavet retningslinjer for hvad der er muligt at dele i dette chatforum. Det er fx ikke tilladt at udvise krænkende adfærd, true eller dele informationer med navne på læger eller andet fagpersonel. Sker dette, vil man automatisk blive blokeret og vil derfor ikke længere have mulighed for at deltage i dette chatforum.",
+            buttonLinkURL: "",
+            swipeableTexts: nil,
+            videoLinkURLs: nil)
+        
+        return chatforum.save(on: req.db).map { chatforum }.flatMap { s -> EventLoopFuture<Subject> in
+            return chatforum_detail.save(on: req.db).map { s }
+        }
+    }
+    
+    private func generateStøtteUnderUddannelseErhvervsUddannelse(req: Request, color: ColorPalette, støtte_under_uddannelse: Subject) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try støtte_under_uddannelse.requireID()
@@ -124,19 +301,19 @@ struct SubjectController: RouteCollection {
         }
         
         let erhvervsuddannelse = Subject(
-            id: UUID(uuidString: "6bd18b8d-c9f4-451f-8a02-f0cd9c6a4a03"),
+            id: UUID(),
             parentID: parentID,
             text: "Erhvervsuddannelse",
             iconURL: iconPath(name: "ic_secondary_school"),
-            backgroundColor: "#A5C9DD"
+            backgroundColor: color.hexColor
         )
         
         return erhvervsuddannelse.save(on: req.db).map { erhvervsuddannelse }.flatMap { s -> EventLoopFuture<Subject> in
-            return self.generateStudievejerStøtteUnderUddannelseErhvervsUddannelse(req: req, erhvervsuddannelse: erhvervsuddannelse)
+            return self.generateStudievejerStøtteUnderUddannelseErhvervsUddannelse(req: req, color: color, erhvervsuddannelse: erhvervsuddannelse)
         }
     }
     
-    private func generateStudievejlederStøtteUnderUddannelseVideregåendeUddannelse(req: Request, støtte_under_uddannelse: Subject) -> EventLoopFuture<Subject> {
+    private func generateStøtteUnderUddannelseVideregåendeUddannelse(req: Request, color: ColorPalette, støtte_under_uddannelse: Subject) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try støtte_under_uddannelse.requireID()
@@ -145,19 +322,19 @@ struct SubjectController: RouteCollection {
         }
         
         let videregåendeuddannelse = Subject(
-            id: UUID(uuidString: "2752ff0d-896c-46ca-8496-8225f7f0b3a0"),
+            id: UUID(),
             parentID: parentID,
             text: "Videregående uddannelse",
             iconURL: iconPath(name: "ic_secondary_school"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         return videregåendeuddannelse.save(on: req.db).map { videregåendeuddannelse }.flatMap { s -> EventLoopFuture<Subject> in
-            return self.generateStudievejerStøtteUnderUddannelseVideregåendeUddannelse(req: req, videregåendeuddannelse: videregåendeuddannelse)
+            return self.generateStøtteUnderUddannelseVideregåendeUddannelse(req: req, color: color, videregåendeuddannelse: videregåendeuddannelse)
         }
     }
     
-    private func generateStudievejlederStøtteUnderUddannelseGymnasieUddannelse(req: Request, støtte_under_uddannelse: Subject) -> EventLoopFuture<Subject> {
+    private func generateStøtteUnderUddannelseGymnasieUddannelse(req: Request, color: ColorPalette, støtte_under_uddannelse: Subject) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try støtte_under_uddannelse.requireID()
@@ -166,19 +343,19 @@ struct SubjectController: RouteCollection {
         }
         
         let gymnasieuddannelse = Subject(
-            id: UUID(uuidString: "6c7efa45-07ba-418a-89f6-c0f7ea184174"),
+            id: UUID(),
             parentID: parentID,
             text: "Gymnasieuddanelse",
             iconURL: iconPath(name: "ic_secondary_school"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         return gymnasieuddannelse.save(on: req.db).map { gymnasieuddannelse }.flatMap { s -> EventLoopFuture<Subject> in
-            return self.generateStudievejerStøtteUnderUddannelseGymnasieUddannelse(req: req, gymnasieuddannelse: gymnasieuddannelse)
+            return self.generateStøtteUnderUddannelseGymnasieUddannelse(req: req, color: color, gymnasieuddannelse: gymnasieuddannelse)
         }
     }
     
-    private func generateStudievejerStøtteUnderUddannelseGymnasieUddannelse(req: Request, gymnasieuddannelse: Subject) -> EventLoopFuture<Subject> {
+    private func generateStøtteUnderUddannelseGymnasieUddannelse(req: Request, color: ColorPalette, gymnasieuddannelse: Subject) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try gymnasieuddannelse.requireID()
@@ -187,56 +364,56 @@ struct SubjectController: RouteCollection {
         }
         
         let gymnasieuddannelse_studietur = Subject(
-            id: UUID(uuidString: "485d887b-d262-4163-82ab-eeaf365725f6"),
+            id: UUID(),
             parentID: parentID,
             text: "Studietur",
             iconURL: iconPath(name: "ic_study_trip"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let gymnasieuddannelse_støttetimer = Subject(
-            id: UUID(uuidString: "8b779e05-82e7-46fb-a7a9-e8e5c870ddd5"),
+            id: UUID(),
             parentID: parentID,
             text: "Støttetimer",
             iconURL: iconPath(name: "ic_supporthours_and_aids"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let gymnasieuddannelse_fritagelseForIdrætC = Subject(
-            id: UUID(uuidString: "70f60599-e586-45a5-9495-af73e6429f9f"),
+            id: UUID(),
             parentID: parentID,
             text: "Fritagelse for idræt C",
             iconURL: iconPath(name: "ic_exemption_from_sports"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let gymnasieuddannelse_udvidelseAfUddannelse = Subject(
-            id: UUID(uuidString: "5950e98d-0c52-4683-abcc-41d9d990101c"),
+            id: UUID(),
             parentID: parentID,
             text: "Udvidelse af uddannelse",
             iconURL: iconPath(name: "ic_extending_education"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let gymnasieuddannelse_syge_supplerende_undervisning = Subject(
-            id: UUID(uuidString: "3ab2d681-e8a0-442c-9985-30e7f70b5509"),
+            id: UUID(),
             parentID: parentID,
             text: "Syge / Supplerende undervisning",
             iconURL: iconPath(name: "ic_sick_or_supplementary_education"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let gymnasieuddannelse_eksamen = Subject(
-            id: UUID(uuidString: "5be5b25a-ef3d-4859-9e6a-eec5ba7ffcef"),
+            id: UUID(),
             parentID: parentID,
             text: "Eksamen",
             iconURL: iconPath(name: "ic_examination_counselor"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let gymnasieuddannelse_studietur_detalje = Detail(
-            id: UUID(uuidString: "33d2ca7c-3f70-4f36-85cd-17f573e9c506"),
-            subjectID: UUID(uuidString: "485d887b-d262-4163-82ab-eeaf365725f6")!,
+            id: UUID(),
+            subjectID: gymnasieuddannelse_studietur.id!,
             htmlText: "Det er muligt at få støtte under studieture. Studieturene kan både være i Danmark og i udlandet. Du kan få støtte til én obligatorisk studietur.\nUdgifter du kan få dækket, er fx hvis du skal have en hjælper eller tegnsprogstolk med på turen; rejse, lønudgifter, ophold, diæter mm.\n\nDu kan tilgå yderligere informationer omkring økonomisk støtte til studieture.",
             buttonLinkURL: "https://www.spsu.dk/for-sps-ansvarlige/administration-af-sps/sps-paa-studierejser-og-i-praktik",
             swipeableTexts: nil,
@@ -244,8 +421,8 @@ struct SubjectController: RouteCollection {
         )
         
         let gymnasieuddannelse_støttetimer_detalje = Detail(
-            id: UUID(uuidString: "c2b87930-082e-4be3-8731-b40371924212"),
-            subjectID: UUID(uuidString: "8b779e05-82e7-46fb-a7a9-e8e5c870ddd5")!,
+            id: UUID(),
+            subjectID: gymnasieuddannelse_støttetimer.id!,
             htmlText: "Hvis du i forbindelse med manglende udbytte af undervisningen har behov for specialundervisning eller anden socialpædagogisk støtte har du muligheden for at få tilbudt støttetimer for at kompensere for psykisk eller fysiske funktionsnedsættelser.\n\nDu kan tilgå yderligere informationer omkring støttetimer.",
             buttonLinkURL: "https://www.uvm.dk/forberedende-grunduddannelse/om-forberedende-grunduddannelse/specialpaedagogisk-stoette",
             swipeableTexts: nil,
@@ -253,8 +430,8 @@ struct SubjectController: RouteCollection {
         )
         
         let gymnasieuddannelse_fritagelseForIdrætC_detalje = Detail(
-            id: UUID(uuidString: "a98c3c24-efd5-48ec-af20-52e2853e20eb"),
-            subjectID: UUID(uuidString: "70f60599-e586-45a5-9495-af73e6429f9f")!,
+            id: UUID(),
+            subjectID: gymnasieuddannelse_fritagelseForIdrætC.id!,
             htmlText: "Hvis du på grund af din sygdom vil have svært ved at deltage i undervisningen idræt C, er der mulighed for at du kan blive fritaget for undervisningen.\nInstitutionen kan træffe en afgørelse herom pga. Sagkyndige oplysninger og udtalelser.\nInstitutionen beslutter samtidig, hvilken undervisning eleven skal gennemføre i stedet for idræt C.\n\nDu kan tilgå yderligere informationer omkring fritagelse for idræt C.",
             buttonLinkURL: "https://www.regionh.dk/ungepanel/nyheder/Sider/Nyheder/2018/fritagelse-fra-idraet-paa-stx-uddannelsen.aspx",
             swipeableTexts: nil,
@@ -262,8 +439,8 @@ struct SubjectController: RouteCollection {
         )
         
         let gymnasieuddannelse_udvidelseAfUddannelse_detalje = Detail(
-            id: UUID(uuidString: "38da9e42-b80f-48ff-8b1b-84142b853bbd"),
-            subjectID: UUID(uuidString: "5950e98d-0c52-4683-abcc-41d9d990101c")!,
+            id: UUID(),
+            subjectID: gymnasieuddannelse_udvidelseAfUddannelse.id!,
             htmlText: "Hvis du på grund af din sygdom er forhindret i at følge undervisningen i længere perioder, kan skolen tilrettelægge en 2-årig gymnasial uddannelse over 3 år og en 3-årig gymnasial uddannelse over 4 år.\n\nDu kan tilgå yderligere informationer omkring udvidelse/forlængelse af din uddannelse kap 9.",
             buttonLinkURL: "https://danskelove.dk/gymnasieloven",
             swipeableTexts: nil,
@@ -271,8 +448,8 @@ struct SubjectController: RouteCollection {
         )
         
         let gymnasieuddannelse_syge_supplerende_undervisning_detalje = Detail(
-            id: UUID(uuidString: "989a4104-2ebf-4e2c-aca2-45c5cfdc681d"),
-            subjectID: UUID(uuidString: "3ab2d681-e8a0-442c-9985-30e7f70b5509")!,
+            id: UUID(),
+            subjectID: gymnasieuddannelse_syge_supplerende_undervisning.id!,
             htmlText: "Hvis du går på en gymnasial uddannelse, har du mulighed for at få sygeundervisning eller supplerende undervisning, hvis du ikke kan følge den almindelige undervisning efter 10 dages sammenhængende fravær ved sygdom.\n\nDu kan tilgå yderligere informationer omkring syge og supplerende undervisning bekendtgørelse kap. 8.",
             buttonLinkURL: "https://www.retsinformation.dk/eli/lta/2017/497",
             swipeableTexts: nil,
@@ -280,8 +457,8 @@ struct SubjectController: RouteCollection {
         )
         
         let gymnasieuddannelse_eksamen_detalje = Detail(
-            id: UUID(uuidString: "550ed454-acf6-4b6a-93cc-cdf934b87b4a"),
-            subjectID: UUID(uuidString: "5be5b25a-ef3d-4859-9e6a-eec5ba7ffcef")!,
+            id: UUID(),
+            subjectID: gymnasieuddannelse_eksamen.id!,
             htmlText: "Hvis din sygdom påvirker din præsentation ved eksamener, har du mulighed for særlige prøvevilkår, så du bliver ligestillet med andre i prøvesituationen.\n\nDu kan tilgå yderligere informationer omkring eksamen prøveafholdelse kap 5.",
             buttonLinkURL: "https://www.retsinformation.dk/eli/lta/2016/343#idc95d8ab3-ad8a-41e6-9af1-78f4afad8421",
             swipeableTexts: nil,
@@ -308,7 +485,7 @@ struct SubjectController: RouteCollection {
         }
     }
     
-    private func generateStudievejerStøtteUnderUddannelseErhvervsUddannelse(req: Request, erhvervsuddannelse: Subject) -> EventLoopFuture<Subject> {
+    private func generateStudievejerStøtteUnderUddannelseErhvervsUddannelse(req: Request, color: ColorPalette, erhvervsuddannelse: Subject) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try erhvervsuddannelse.requireID()
@@ -317,64 +494,64 @@ struct SubjectController: RouteCollection {
         }
         
         let erhvervsuddannelse_ekstra_undervisning = Subject(
-            id: UUID(uuidString: "b97d02f9-d971-4eb1-840e-484c31b91130"),
+            id: UUID(),
             parentID: parentID,
             text: "Ekstra undervisning",
             iconURL: iconPath(name: "ic_extra_teaching"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let erhvervsuddannelse_udvidelse_af_uddannelse = Subject(
-            id: UUID(uuidString: "3d83ada0-b19e-4f26-bed5-93b526f66937"),
+            id: UUID(),
             parentID: parentID,
             text: "Udvidelse af uddannelse",
             iconURL: iconPath(name: "ic_extending_education"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let erhvervsuddannelse_støtte_timer_hjælpemidler = Subject(
-            id: UUID(uuidString: "4d4745bf-d50b-4d86-8152-2986d7745a6b"),
+            id: UUID(),
             parentID: parentID,
             text: "Støttetimer/hjælpemidler",
             iconURL: iconPath(name: "ic_supporthours_and_aids"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let erhvervsuddannelse_eksamen = Subject(
-            id: UUID(uuidString: "717b9711-55d2-4802-ba0e-7d4d655a4047"),
+            id: UUID(),
             parentID: parentID,
             text: "Eksamen",
             iconURL: iconPath(name: "ic_examination_counselor"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let erhvervsuddannelse_revalidering = Subject(
-            id: UUID(uuidString: "4d2bc06d-35cb-4efb-94b3-aae8236a7b43"),
+            id: UUID(),
             parentID: parentID,
             text: "Revalidering",
             iconURL: iconPath(name: "ic_rehabiliation"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let erhvervsuddannelse_handicap_tillæg = Subject(
-            id: UUID(uuidString: "174ccd2a-245f-4a22-a1ef-95c49b2aa4a7"),
+            id: UUID(),
             parentID: parentID,
             text: "Handicap tillæg",
             iconURL: iconPath(name: "ic_handicap_supplement"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let erhvervsuddannelse_praktik = Subject(
-            id: UUID(uuidString: "20047a0d-6e54-4778-84e5-e8f183ff855d"),
+            id: UUID(),
             parentID: parentID,
             text: "Praktik",
             iconURL: iconPath(name: "ic_internship"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let erhvervsuddannelse_ekstra_undervisning_detalje = Detail(
-            id: UUID(uuidString: "928db278-0392-4efd-81fe-7e283dc90999"),
-            subjectID: UUID(uuidString: "b97d02f9-d971-4eb1-840e-484c31b91130")!,
+            id: UUID(),
+            subjectID: erhvervsuddannelse_ekstra_undervisning.id!,
             htmlText: "Hvis du er i forbindelse med manglende udbytte af undervisningen, har behov for specialundervisning eller anden socialpædagogisk støtte har du muligheden for at få tilbudt støttetimer for at kompensere for psykiske eller fysiske funktionsnedsættelser.\n\nDu kan tilgå yderligere informationer omkring ekstra undervisning.",
             buttonLinkURL: "https://www.spsu.dk/for-sps-ansvarlige/videregaaende-uddannelser/psykiske-funktionsnedsaettelser/korte-og-mellemlange-videregaaende-uddannelser/stoetteformer/stoettetimer-ved-faglig-stoettelaerer",
             swipeableTexts: nil,
@@ -382,8 +559,8 @@ struct SubjectController: RouteCollection {
         )
         
         let erhvervsuddannelse_udvidelse_af_uddannelse_detalje = Detail(
-            id: UUID(uuidString: "c5a0da20-4ea3-41d4-a9f7-d2838a13eb33"),
-            subjectID: UUID(uuidString: "3d83ada0-b19e-4f26-bed5-93b526f66937")!,
+            id: UUID(),
+            subjectID: erhvervsuddannelse_udvidelse_af_uddannelse.id!,
             htmlText: "Hvis du har brug for en længere uddannelsestid, end den uddannelsestid skolen har beregnet, kan man søge om forlængelse.\nErhvervsskolen vejleder gerne om mulighederne, og i nogle tilfælde kan skolen og det lokale uddannelsesudvalg godkende en forlængelse af uddannelsestiden uden, at der skal sendes en ansøgning til det faglige udvalg.\n\nDu kan tilgå yderligere informationer omkring udvidelse af uddannelse.",
             buttonLinkURL: "https://www.uddannelsesnaevnet.dk/virksomheder/uddannelsesaftalen/afkortning-eller-forlaengelse-af-uddannelsestid",
             swipeableTexts: nil,
@@ -391,8 +568,8 @@ struct SubjectController: RouteCollection {
         )
         
         let erhvervsuddannelse_støtte_timer_hjælpemidler_detalje = Detail(
-            id: UUID(uuidString: "79485865-3970-4b3b-88db-b4057a66efdb"),
-            subjectID: UUID(uuidString: "4d4745bf-d50b-4d86-8152-2986d7745a6b")!,
+            id: UUID(),
+            subjectID: erhvervsuddannelse_støtte_timer_hjælpemidler.id!,
             htmlText: "Hvis du får bevilget studiestøttetimer, kan du fx arbejde med udvikling af strategier til at styrker og understøtte dit faglige overblik og struktur.\nDu kan få hjælp til at bruge forskellige planlægningsværktøjer, som du kan bruge, når du skal skrive opgaver eller i gang med større projekter.\n\nDu kan tilgå yderligere informationer omkring støttetimer og hjælpemidler.",
             buttonLinkURL: "https://www.spsu.dk/for-elever-og-studerende/leverandører%20af%20støtte",
             swipeableTexts: nil,
@@ -400,8 +577,8 @@ struct SubjectController: RouteCollection {
         )
         
         let erhvervsuddannelse_eksamen_detalje = Detail(
-            id: UUID(uuidString: "283dc4bf-6d0d-4d48-85be-6c9514d0ef33"),
-            subjectID: UUID(uuidString: "717b9711-55d2-4802-ba0e-7d4d655a4047")!,
+            id: UUID(),
+            subjectID: erhvervsuddannelse_eksamen.id!,
             htmlText: "Hvis din sygdom påvirker din præstation ved eksamener, har du muligheden for særlige prøvevilkår, så du bliver ligestillet med andre i prøvesituationen.\n\nDu kan tilgå yderligere informationer omkring eksamen prøveafholdelse kap 5.",
             buttonLinkURL: "https://www.retsinformation.dk/eli/lta/2016/343#idc95d8ab3-ad8a-41e6-9af1-78f4afad8421",
             swipeableTexts: nil,
@@ -409,8 +586,8 @@ struct SubjectController: RouteCollection {
         )
         
         let erhvervsuddannelse_revalidering_detalje = Detail(
-            id: UUID(uuidString: "ccedf162-2923-42a1-b267-de1dd7d02f27"),
-            subjectID: UUID(uuidString: "4d2bc06d-35cb-4efb-94b3-aae8236a7b43")!,
+            id: UUID(),
+            subjectID: erhvervsuddannelse_revalidering.id!,
             htmlText: "Revalidering er både erhvervsrettede aktiviteter og økonomisk hjælp.\nRevalidering kan ske enten i form for revalidering eller når det erhvervsmæssige sigte er afklaret dvs. revalidering efter en særlig jobplan.\nAktiviteterne kan fx være arbejdsprøvning, uddannelse, optræning hos private eller offentlige arbejdsgivere eller hjælp til etablering af selvstændig virksomhed.\nDen økonomiske hjælp kan være kontanthjælp eller revalideringsydelse.\nFor at kunne få revalidering er det en forudsætning, at man har begrænsninger i arbejdsevnen, og at der ikke er andre tilbud som kan hjælpe en med at få tilknytning til arbejdsmarkedet.\n\nDu kan tilgå yderligere informationer omkring revalidering.",
             buttonLinkURL: "https://star.dk/da/indsatser-og-ordninger/indsatser-ved-sygdom-nedslidning-mv/revalidering/",
             swipeableTexts: nil,
@@ -418,8 +595,8 @@ struct SubjectController: RouteCollection {
         )
         
         let erhvervsuddannelse_handicap_tillæg_detalje = Detail(
-            id: UUID(uuidString: "546c5b28-1b19-472a-ae7e-12de32450828"),
-            subjectID: UUID(uuidString: "174ccd2a-245f-4a22-a1ef-95c49b2aa4a7")!,
+            id: UUID(),
+            subjectID: erhvervsuddannelse_handicap_tillæg.id!,
             htmlText: "Læser du på en dansk erhvervsuddannelse og har en varig psykisk eller fysisk funktionsnedsættelse, der giver dig meget betydelige begrænsninger i evnen til at påtage dig et erhvervsarbejde, så kan du søge om at få et handicaptillæg ved siden af din SU.\nDu kan som noget nyt søge handicaptillæg i de måneder, hvor du modtager SU (grundforløbende og øvrige forløb med SU).\n\nDu kan tilgå yderligere informationer omkring handicaptillæg.",
             buttonLinkURL: "https://www.su.dk/su/saerlig-stoette-til-foraeldre-handicappede-mv/handicaptillaeg/",
             swipeableTexts: nil,
@@ -427,8 +604,8 @@ struct SubjectController: RouteCollection {
         )
         
         let erhvervsuddannelse_praktik_detalje = Detail(
-            id: UUID(uuidString: "f1fba7fd-ee2d-4a2e-bc63-39ffb122343c"),
-            subjectID: UUID(uuidString: "20047a0d-6e54-4778-84e5-e8f183ff855d")!,
+            id: UUID(),
+            subjectID: erhvervsuddannelse_praktik.id!,
             htmlText:
             """
             <p>AUB giver tilskud til elever:</p>
@@ -470,7 +647,7 @@ struct SubjectController: RouteCollection {
         }
     }
     
-    private func generateStudievejerStøtteUnderUddannelseVideregåendeUddannelse(req: Request, videregåendeuddannelse: Subject) -> EventLoopFuture<Subject> {
+    private func generateStøtteUnderUddannelseVideregåendeUddannelse(req: Request, color: ColorPalette, videregåendeuddannelse: Subject) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try videregåendeuddannelse.requireID()
@@ -479,48 +656,48 @@ struct SubjectController: RouteCollection {
         }
         
         let videregåendeuddannelse_orlov = Subject(
-            id: UUID(uuidString: "8408ae98-a5cb-46a9-b9f4-8f177b0d99be"),
+            id: UUID(),
             parentID: parentID,
             text: "Orlov",
             iconURL: iconPath(name: "ic_sick_or_supplementary_education"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let videregåendeuddannelse_støtte_timer_hjælpemidler = Subject(
-            id: UUID(uuidString: "9eeceab0-423a-4ebe-a35a-e930f95e62dc"),
+            id: UUID(),
             parentID: parentID,
             text: "Støttetimer/hjælpemidler",
             iconURL: iconPath(name: "ic_supporthours_and_aids"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let videregåendeuddannelse_praktik = Subject(
-            id: UUID(uuidString: "f613fc30-ba69-4ccc-a570-093e541cee14"),
+            id: UUID(),
             parentID: parentID,
             text: "Praktik",
             iconURL: iconPath(name: "ic_internship"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let videregåendeuddannelse_handicap_tillæg = Subject(
-            id: UUID(uuidString: "e10b224c-c248-45b6-b09e-2dfd2f2dcfed"),
+            id: UUID(),
             parentID: parentID,
             text: "Handicap tillæg",
             iconURL: iconPath(name: "ic_handicap_supplement"),
-            backgroundColor: ColorPalette.lightSteelBlue.hexColor
+            backgroundColor: color.hexColor
         )
         
         let videregåendeuddannelse_revalidering = Subject(
-             id: UUID(uuidString: "6e2dbaf5-ab74-47a2-978b-294d41d3642b"),
+             id: UUID(),
              parentID: parentID,
              text: "Revaldering",
              iconURL: iconPath(name: "ic_rehabiliation"),
-             backgroundColor: ColorPalette.lightSteelBlue.hexColor
+             backgroundColor: color.hexColor
         )
         
         let videregåendeuddannelse_orlov_detalje = Detail(
-            id: UUID(uuidString: "54e249ff-5fd3-4d29-a3ba-dbb2580da90d"),
-            subjectID: UUID(uuidString: "8408ae98-a5cb-46a9-b9f4-8f177b0d99be")!,
+            id: UUID(),
+            subjectID: videregåendeuddannelse_orlov.id!,
             htmlText: "Der kan være mange forskellige grunde til at søge om orlov fx graviditet, arbejde, værnepligt eller sygdom.\nStudievejlederen på uddannelsesstedet kan rådgive dig om reglerne og ansøgningsproceduren, samt komme med gode råd.\n\nDu kan tilgå yderligere informationer omkring orlov.",
             buttonLinkURL: "https://www.ug.dk/videregaaendeuddannelse/orlov-paa-videregaaende-uddannelser",
             swipeableTexts: nil,
@@ -528,8 +705,8 @@ struct SubjectController: RouteCollection {
         )
         
         let videregåendeuddannelse_støtte_timer_hjælpemidler_detalje = Detail(
-            id: UUID(uuidString: "987727e8-782d-4596-9bdd-e6af39a05263"),
-            subjectID: UUID(uuidString: "9eeceab0-423a-4ebe-a35a-e930f95e62dc")!,
+            id: UUID(),
+            subjectID: videregåendeuddannelse_støtte_timer_hjælpemidler.id!,
             htmlText: "Hvis du får bevilget studiestøttetimer, kan du fx arbejde med udvikling af strategier til at styrker og understøtte dit faglige overblik og struktur.\nDu kan få hjælp til at bruge forskellige planlægningsværktøjer, som du kan bruge, når du skal skrive opgaver eller i gang med større projekter.\n\nDu kan tilgå yderligere informationer omkring støttetimer og hjælpemidler.",
             buttonLinkURL: "https://www.spsu.dk/for-elever-og-studerende/leverandører%20af%20støtte",
             swipeableTexts: nil,
@@ -537,8 +714,8 @@ struct SubjectController: RouteCollection {
         )
         
         let videregåendeuddannelse_praktik_detalje = Detail(
-            id: UUID(uuidString: "90dd8bb1-0447-4929-85bd-4fa1785fff85"),
-            subjectID: UUID(uuidString: "f613fc30-ba69-4ccc-a570-093e541cee14")!,
+            id: UUID(),
+            subjectID: videregåendeuddannelse_praktik.id!,
             htmlText: "Er der obligatoriske praktikperioder under din uddannelse, så giver dette dig også ret til SPS under praktikken, selvom praktikperioden evt. Ikke er SU berettiget.\n\nDu kan tilgå yderligere informationer omkring praktik.",
             buttonLinkURL: "https://www.spsu.dk/for-elever-og-studerende/sps-naar-du-er-studerende-paa-en-videregaaende-uddannelse/sps-naar-du-er-studerende-paa-en-videregaaende-uddannelse",
             swipeableTexts: nil,
@@ -546,8 +723,8 @@ struct SubjectController: RouteCollection {
         )
         
         let videregåendeuddannelse_handicap_tillæg_detalje = Detail(
-            id: UUID(uuidString: "6e3d4c04-4370-4861-ac1b-eae4c1d52168"),
-            subjectID: UUID(uuidString: "e10b224c-c248-45b6-b09e-2dfd2f2dcfed")!,
+            id: UUID(),
+            subjectID: videregåendeuddannelse_handicap_tillæg.id!,
             htmlText: "Læser du på en dansk erhvervsuddannelse og har en varig psykisk eller fysisk funktionsnedsættelse, der giver dig meget betydelige begrænsninger i evnen til at påtage dig et erhvervsarbejde, så kan du søge om at få et handicaptillæg ved siden af din SU.\nDu kan som noget nyt søge handicaptillæg i de måneder, hvor du modtager SU (grundforløbende og øvrige forløb med SU).\n\nDu kan tilgå yderligere informationer omkring handicaptillæg.",
             buttonLinkURL: "https://www.su.dk/su/saerlig-stoette-til-foraeldre-handicappede-mv/handicaptillaeg/",
             swipeableTexts: nil,
@@ -555,8 +732,8 @@ struct SubjectController: RouteCollection {
         )
         
         let videregåendeuddannelse_revalidering_detalje = Detail(
-            id: UUID(uuidString: "dc99442e-acc1-4e78-880a-6ebddc321251"),
-            subjectID: UUID(uuidString: "6e2dbaf5-ab74-47a2-978b-294d41d3642b")!,
+            id: UUID(),
+            subjectID: videregåendeuddannelse_revalidering.id!,
             htmlText: "Revalidering er både erhvervsrettede aktiviteter og økonomisk hjælp.\nRevalidering kan ske enten i form for revalidering eller når det erhvervsmæssige sigte er afklaret dvs. revalidering efter en særlig jobplan.\nAktiviteterne kan fx være arbejdsprøvning, uddannelse, optræning hos private eller offentlige arbejdsgivere eller hjælp til etablering af selvstændig virksomhed.\nDen økonomiske hjælp kan være kontanthjælp eller revalideringsydelse.\nFor at kunne få revalidering er det en forudsætning, at man har begrænsninger i arbejdsevnen, og at der ikke er andre tilbud som kan hjælpe en med at få tilknytning til arbejdsmarkedet.\n\nDu kan tilgå yderligere informationer omkring revalidering.",
             buttonLinkURL: "https://star.dk/da/indsatser-og-ordninger/indsatser-ved-sygdom-nedslidning-mv/revalidering/",
             swipeableTexts: nil,

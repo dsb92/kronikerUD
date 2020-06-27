@@ -11,9 +11,11 @@ public func configure(_ app: Application) throws {
     
     // Heroku uses SSL verifcation when connecting to database.
     // Below is therefor only necessary if you want to debug production database
-    var config = PostgresConfiguration(url: Environment.databaseURL)!
-    config.tlsConfiguration = TLSConfiguration.forClient(certificateVerification: .none)
-    app.databases.use(.postgres(configuration: config), as: .psql)
+//    var config = PostgresConfiguration(url: Environment.databaseURL)!
+//    config.tlsConfiguration = TLSConfiguration.forClient(certificateVerification: .none)
+//    app.databases.use(.postgres(configuration: config), as: .psql)
+    
+    try app.databases.use(.postgres(url: Environment.databaseURL), as: .psql)
     
     // Tables
     app.migrations.add(CreateSubject())
