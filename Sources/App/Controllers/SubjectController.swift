@@ -30,7 +30,9 @@ struct SubjectController: RouteCollection {
             return Subject.query(on: req.db).delete()
         }.flatMap { _ in
             return self.generateStudievejleder(req: req).flatMap { _ in
-                return self.generateStuderende(req: req)
+                return self.generateStuderende(req: req).flatMap { _ in
+                    return self.generateLønmodtager(req: req)
+                }
             }.transform(to: .noContent)
         }
     }
@@ -69,6 +71,26 @@ struct SubjectController: RouteCollection {
                 return self.generateStuderendeGoderåd(req: req, studerende: studerende).flatMap { _ in
                     return self.generateStuderendeMindfulness(req: req, studerende: studerende).flatMap { _ in
                         return self.generateStuderendeChatforum(req: req, studerende: studerende)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func generateLønmodtager(req: Request) -> EventLoopFuture<Subject> {
+        let lønmodtager = Subject(
+            id: UUID(),
+            parentID: nil,
+            text: "Lønmodtager",
+            iconURL: iconPath(name: "ic_chatforum"),
+            backgroundColor: ColorPalette.beige.hexColor
+        )
+        
+        return lønmodtager.save(on: req.db).map { lønmodtager }.flatMap { _ in
+            return self.generateLønmodtagerRefusion(req: req, lønmodtager: lønmodtager).flatMap { _ in
+                return self.generateLønmodtagerHjælpemidler(req: req, lønmodtager: lønmodtager).flatMap { _ in
+                    return self.generateLønmodtagerPersonligAssistent(req: req, lønmodtager: lønmodtager).flatMap { _ in
+                        return self.generateLønmodtagerFortrinsret(req: req, lønmodtager: lønmodtager)
                     }
                 }
             }
@@ -290,6 +312,126 @@ struct SubjectController: RouteCollection {
         
         return chatforum.save(on: req.db).map { chatforum }.flatMap { s -> EventLoopFuture<Subject> in
             return chatforum_detail.save(on: req.db).map { s }
+        }
+    }
+    
+    private func generateLønmodtagerRefusion(req: Request, lønmodtager: Subject) -> EventLoopFuture<Subject> {
+        var parentID: UUID? = nil
+        do {
+            parentID = try lønmodtager.requireID()
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+        let lønmodtager_refusion = Subject(
+            id: UUID(),
+            parentID: parentID,
+            text: "§56 - refusion til din arbejdsplads",
+            iconURL: iconPath(name: "ic_mindfulness_info"),
+            backgroundColor: ColorPalette.beige.hexColor
+        )
+        
+        let lønmodtager_refusion_detalje = Detail(
+            id: UUID(),
+            subjectID: lønmodtager_refusion.id!,
+            htmlText: "Du har mulighed for at indgå en § 56-aftale med din arbejdsgiver, hvis du har en kronisk sygdom, der medfører, at du har et øget fravær på minimum 10 dage om året. En § 56-aftale gælder både private og offentlige arbejdsgivere. Aftalen giver arbejdsgiveren ret til at få refusion fra din kommune med et beløb, der svarer til sygedagpenge, når du er sygemeldt på grund af din kroniske sygdom. Dette gælder fra din første sygedag. Aftalen skal indgås med din arbejdsgiver og godkendes af din kommune. Aftalen gælder for to år, hvorefter den skal revurderes.\n\nDu kan tilgå yderligere information omkring §56 refusion til arbejdsplads.",
+            buttonLinkURL: "https://danskelove.dk/sygedagpengeloven/56",
+            swipeableTexts: nil,
+            videoLinkURLs: nil
+        )
+        
+        return lønmodtager_refusion.save(on: req.db).map { lønmodtager_refusion }.flatMap { s -> EventLoopFuture<Subject> in
+            return lønmodtager_refusion_detalje.save(on: req.db).map { s }
+        }
+    }
+    
+    private func generateLønmodtagerHjælpemidler(req: Request, lønmodtager: Subject) -> EventLoopFuture<Subject> {
+        var parentID: UUID? = nil
+        do {
+            parentID = try lønmodtager.requireID()
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+        let lønmodtager_hjælpemidler = Subject(
+            id: UUID(),
+            parentID: parentID,
+            text: "Hjælpemidler og indretning af arbejdspladsen",
+            iconURL: iconPath(name: "ic_mindfulness_info"),
+            backgroundColor: ColorPalette.beige.hexColor
+        )
+        
+        let lønmodtager_hjælpemidler_detalje = Detail(
+            id: UUID(),
+            subjectID: lønmodtager_hjælpemidler.id!,
+            htmlText: "Hvis du har brug for hjælpemidler eller særlig indretning af din arbejdsplads for at blive i dit job, kan du søge om tilskud i din kommunes jobcenter. Du kan få tilskud til et hjælpemiddel eller særlig indretning af arbejdspladsen, hvis det er nødvendigt for, at du kan beholde din stilling eller deltage i et tilbud fra jobcentret. Det er ikke muligt at få tilskud til hjælpemidler, der sædvanligt findes på arbejdspladsen. Tilskud ydes til hjælpemidler, der er direkte relaterede til dit arbejde. Du kan desuden låne et arbejdsredskab i kommunen i stedet for tilskud til at købe et nyt.\n\nDu kan tilgå yderligere information omkring hjælpemidler og indretning af arbejdspladsen.",
+            buttonLinkURL: "https://star.dk/indsatser-og-ordninger/handicapomraadet/hjaelpemidler/",
+            swipeableTexts: nil,
+            videoLinkURLs: nil
+        )
+        
+        return lønmodtager_hjælpemidler.save(on: req.db).map { lønmodtager_hjælpemidler }.flatMap { s -> EventLoopFuture<Subject> in
+            return lønmodtager_hjælpemidler_detalje.save(on: req.db).map { s }
+        }
+    }
+    
+    private func generateLønmodtagerPersonligAssistent(req: Request, lønmodtager: Subject) -> EventLoopFuture<Subject> {
+        var parentID: UUID? = nil
+        do {
+            parentID = try lønmodtager.requireID()
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+        let lønmodtager_personlig_assistent = Subject(
+            id: UUID(),
+            parentID: parentID,
+            text: "Personlig assistent",
+            iconURL: iconPath(name: "ic_mindfulness_info"),
+            backgroundColor: ColorPalette.beige.hexColor
+        )
+        
+        let lønmodtager_personlig_assistent_detalje = Detail(
+            id: UUID(),
+            subjectID: lønmodtager_personlig_assistent.id!,
+            htmlText: "Du kan få en personlig assistent på dit job, hvis du har vanskeligt ved at udføre nogle arbejdsopgaver på grund af din sygdom. Assistenten kan hjælpe dig med praktiske arbejdsopgaver, men må ikke overtage den faglige del af dit arbejde. Din arbejdsgiver kan få tilskud til at ansætte den personlige assistent. En arbejdsplads har også mulighed for selv at påtage sig en sådan opgave, hvis en kollega i din afdeling kan give den fornødne assistance. Du kan også få en personlig assistent, hvis du skal efteruddanne eller videreuddanne dig. Ordningen henvender sig til lønmodtagere, selvstændige og ledige, der er berettigede til dagpenge. Du kan få den personlige assistent tilbudt, hvis du ikke kan få hjælp på din uddannelsesinstitution.\n\nDu kan tilgå yderligere information omkring personlig assistent på job eller efteruddannelse.",
+            buttonLinkURL: "https://star.dk/indsatser-og-ordninger/handicapomraadet/personlig-assistance/",
+            swipeableTexts: nil,
+            videoLinkURLs: nil
+        )
+        
+        return lønmodtager_personlig_assistent.save(on: req.db).map { lønmodtager_personlig_assistent }.flatMap { s -> EventLoopFuture<Subject> in
+            return lønmodtager_personlig_assistent_detalje.save(on: req.db).map { s }
+        }
+    }
+    
+    private func generateLønmodtagerFortrinsret(req: Request, lønmodtager: Subject) -> EventLoopFuture<Subject> {
+        var parentID: UUID? = nil
+        do {
+            parentID = try lønmodtager.requireID()
+        } catch {
+            print(error.localizedDescription)
+        }
+        
+        let lønmodtager_fortrinsret = Subject(
+            id: UUID(),
+            parentID: parentID,
+            text: "Fortrinsadgang",
+            iconURL: iconPath(name: "ic_mindfulness_info"),
+            backgroundColor: ColorPalette.beige.hexColor
+        )
+        
+        let lønmodtager_fortrinsret_detalje = Detail(
+            id: UUID(),
+            subjectID: lønmodtager_fortrinsret.id!,
+            htmlText: "Mennesker med handicap kan bede om fortrinsret til ledige stillinger inden for det offentlige. Det kan du gøre, hvis du har vanskeligt ved at få et arbejde på det almindelige arbejdsmarked. Reglerne åbner op for, at du vil blive indkaldt til en ansættelsessamtale, hvis du søger ledige stillinger hos offentlige arbejdsgivere. Hvis du ønsker at bruge reglerne om fortrinsadgang, kan du enten rette henvendelse til jobcenteret og bede dem gå ind i sagen. Du kan også selv gøre opmærksom på reglerne i ansøgningen. Handicappede har også fortrinsret, når de søger om f.eks. en ledig stadeplads, en forpagtning eller en bevilling til taxikørsel.\n\nDu kan tilgå yderligere information omkring fortrinsadgang.",
+            buttonLinkURL: "https://star.dk/indsatser-og-ordninger/handicapomraadet/fortrinsadgang/",
+            swipeableTexts: nil,
+            videoLinkURLs: nil
+        )
+        
+        return lønmodtager_fortrinsret.save(on: req.db).map { lønmodtager_fortrinsret }.flatMap { s -> EventLoopFuture<Subject> in
+            return lønmodtager_fortrinsret_detalje.save(on: req.db).map { s }
         }
     }
     
