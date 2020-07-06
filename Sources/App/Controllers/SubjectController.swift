@@ -17,10 +17,11 @@ struct SubjectController: RouteCollection {
                     .with(\.$subjects) { subject in
                         subject.with(\.$details)
                         subject.with(\.$subjects) { subject in
-                                subject.with(\.$details)
+                            subject.with(\.$subjects)
+                            subject.with(\.$details)
                         }
                     }
-            }
+            }.with(\.$details)
         .all()
     }
     
