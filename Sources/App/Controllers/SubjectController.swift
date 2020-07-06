@@ -83,7 +83,7 @@ struct SubjectController: RouteCollection {
             parentID: nil,
             text: "Lønmodtager",
             iconURL: iconPath(name: "ic_earner"),
-            backgroundColor: ColorPalette.beige.hexColor
+            backgroundColor: ColorPalette.navajoWhite.hexColor
         )
         
         return lønmodtager.save(on: req.db).map { lønmodtager }.flatMap { _ in
@@ -328,7 +328,7 @@ struct SubjectController: RouteCollection {
             parentID: parentID,
             text: "§56 - refusion til din arbejdsplads",
             iconURL: iconPath(name: "ic_56_refusion"),
-            backgroundColor: ColorPalette.beige.hexColor
+            backgroundColor: ColorPalette.navajoWhite.hexColor
         )
         
         let lønmodtager_refusion_detalje = Detail(
@@ -358,7 +358,7 @@ struct SubjectController: RouteCollection {
             parentID: parentID,
             text: "Hjælpemidler og indretning af arbejdspladsen",
             iconURL: iconPath(name: "ic_aids_workplace"),
-            backgroundColor: ColorPalette.beige.hexColor
+            backgroundColor: ColorPalette.navajoWhite.hexColor
         )
         
         let lønmodtager_hjælpemidler_detalje = Detail(
@@ -388,7 +388,7 @@ struct SubjectController: RouteCollection {
             parentID: parentID,
             text: "Personlig assistent",
             iconURL: iconPath(name: "ic_personal_assist"),
-            backgroundColor: ColorPalette.beige.hexColor
+            backgroundColor: ColorPalette.navajoWhite.hexColor
         )
         
         let lønmodtager_personlig_assistent_detalje = Detail(
@@ -418,7 +418,7 @@ struct SubjectController: RouteCollection {
             parentID: parentID,
             text: "Fortrinsadgang",
             iconURL: iconPath(name: "ic_fortrinsadgang"),
-            backgroundColor: ColorPalette.beige.hexColor
+            backgroundColor: ColorPalette.navajoWhite.hexColor
         )
         
         let lønmodtager_fortrinsret_detalje = Detail(
