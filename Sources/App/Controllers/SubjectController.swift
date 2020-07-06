@@ -82,7 +82,7 @@ struct SubjectController: RouteCollection {
             id: UUID(),
             parentID: nil,
             text: "Lønmodtager",
-            iconURL: iconPath(name: "ic_chatforum"),
+            iconURL: iconPath(name: "ic_earner"),
             backgroundColor: ColorPalette.beige.hexColor
         )
         
@@ -327,7 +327,7 @@ struct SubjectController: RouteCollection {
             id: UUID(),
             parentID: parentID,
             text: "§56 - refusion til din arbejdsplads",
-            iconURL: iconPath(name: "ic_mindfulness_info"),
+            iconURL: iconPath(name: "ic_56_refusion"),
             backgroundColor: ColorPalette.beige.hexColor
         )
         
@@ -357,7 +357,7 @@ struct SubjectController: RouteCollection {
             id: UUID(),
             parentID: parentID,
             text: "Hjælpemidler og indretning af arbejdspladsen",
-            iconURL: iconPath(name: "ic_mindfulness_info"),
+            iconURL: iconPath(name: "ic_aids_workplace"),
             backgroundColor: ColorPalette.beige.hexColor
         )
         
@@ -387,7 +387,7 @@ struct SubjectController: RouteCollection {
             id: UUID(),
             parentID: parentID,
             text: "Personlig assistent",
-            iconURL: iconPath(name: "ic_mindfulness_info"),
+            iconURL: iconPath(name: "ic_personal_assist"),
             backgroundColor: ColorPalette.beige.hexColor
         )
         
@@ -417,7 +417,7 @@ struct SubjectController: RouteCollection {
             id: UUID(),
             parentID: parentID,
             text: "Fortrinsadgang",
-            iconURL: iconPath(name: "ic_mindfulness_info"),
+            iconURL: iconPath(name: "ic_fortrinsadgang"),
             backgroundColor: ColorPalette.beige.hexColor
         )
         
