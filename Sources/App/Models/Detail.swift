@@ -20,11 +20,11 @@ final class Detail: Model, Content {
     var swipeableTexts: [String]?
     
     @OptionalField(key: "video_link_urls")
-    var videoLinkURLs: [String]?
+    var videoLinkURLs: [LinkURL]?
 
     init() { }
 
-    init(id: UUID? = nil, subjectID: UUID, htmlText: String?, buttonLinkURL: String?, swipeableTexts: [String]?, videoLinkURLs: [String]?) {
+    init(id: UUID? = nil, subjectID: UUID, htmlText: String?, buttonLinkURL: String?, swipeableTexts: [String]?, videoLinkURLs: [LinkURL]?) {
         self.id = id
         self.$subject.id = subjectID
         self.htmlText = htmlText
@@ -32,4 +32,9 @@ final class Detail: Model, Content {
         self.swipeableTexts = swipeableTexts
         self.videoLinkURLs = videoLinkURLs
     }
+}
+
+struct LinkURL: Codable {
+    let text: String
+    let URL: String
 }

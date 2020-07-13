@@ -276,8 +276,8 @@ struct SubjectController: RouteCollection {
             buttonLinkURL: nil,
             swipeableTexts: nil,
             videoLinkURLs: [
-                "https://www.youtube.com/watch?v=aKUU5_H6H3c",
-                "https://www.youtube.com/watch?v=i7RNkHI7d8Y"
+                LinkURL(text: "10 minutters guidet Body scan", URL: "https://www.youtube.com/watch?v=aKUU5_H6H3c"),
+                LinkURL(text: "20 minutters guidet Body scan", URL: "https://www.youtube.com/watch?v=i7RNkHI7d8Y")
             ]
         )
         
@@ -306,7 +306,7 @@ struct SubjectController: RouteCollection {
             id: UUID(),
             subjectID: chatforum.id!,
             htmlText: "Her i chatten har du mulighed for at chatte, oprette et netværk med andre kronisk syge, som enten er under uddannelse, eller som gerne vil starte på en uddannelse. Chatten vil for dig være muligheden for at skabe dig et nyt netværk, spare med andre kronisk syge med studerende, samt stille spørgsmål til din studievejleder. Selve chatten fungerer på den måde, at du optræder som en anonym bruger, dog er der lavet retningslinjer for hvad der er muligt at dele i dette chatforum. Det er fx ikke tilladt at udvise krænkende adfærd, true eller dele informationer med navne på læger eller andet fagpersonel. Sker dette, vil man automatisk blive blokeret og vil derfor ikke længere have mulighed for at deltage i dette chatforum.",
-            buttonLinkURL: "",
+            buttonLinkURL: nil,
             swipeableTexts: nil,
             videoLinkURLs: nil)
         
