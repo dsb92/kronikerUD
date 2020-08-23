@@ -6,9 +6,6 @@ final class Subject: Model, Content {
     
     @ID(key: .id)
     var id: UUID?
-    
-    @OptionalParent(key: "parent_id")
-    var parent: Subject?
 
     @Children(for: \.$parent)
     var subjects: [Subject]
@@ -24,6 +21,9 @@ final class Subject: Model, Content {
     
     @Field(key: "backgroundColor")
     var backgroundColor: String
+    
+    @OptionalParent(key: "parent_id")
+    var parent: Subject?
     
     init() { }
 

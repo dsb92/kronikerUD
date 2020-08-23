@@ -1,9 +1,9 @@
 import Fluent
 
-struct SubjectAddBackgroundColor: Migration {
+struct PostAddChannel: Migration {
     func prepare(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("subjects")
-            .field("backgroundColor", .string, .required)
+        database.schema("posts")
+            .field("channel_id", .uuid, .references("channels", "id"))
             .update()
     }
 

@@ -4,7 +4,7 @@ import Vapor
 struct SubjectController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let subjects = routes.grouped("subjects")
-        subjects.get(use: getSubjects)
+        subjects.get("all", use: getSubjects)
         subjects.post("generate", use: generateSubjects)
     }
     

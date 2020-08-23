@@ -1,7 +1,6 @@
 import Fluent
 
 struct CreateDetail: Migration {
-    // Prepares the database for storing Star models.
     func prepare(on database: Database) -> EventLoopFuture<Void> {
         database.schema("details")
             .id()
