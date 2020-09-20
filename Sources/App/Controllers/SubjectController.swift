@@ -308,7 +308,8 @@ struct SubjectController: RouteCollection {
             htmlText: "Her i chatten har du mulighed for at chatte, oprette et netværk med andre kronisk syge, som enten er under uddannelse, eller som gerne vil starte på en uddannelse. Chatten vil for dig være muligheden for at skabe dig et nyt netværk, spare med andre kronisk syge med studerende, samt stille spørgsmål til din studievejleder. Selve chatten fungerer på den måde, at du optræder som en anonym bruger, dog er der lavet retningslinjer for hvad der er muligt at dele i dette chatforum. Det er fx ikke tilladt at udvise krænkende adfærd, true eller dele informationer med navne på læger eller andet fagpersonel. Sker dette, vil man automatisk blive blokeret og vil derfor ikke længere have mulighed for at deltage i dette chatforum.",
             buttonLinkURL: nil,
             swipeableTexts: nil,
-            videoLinkURLs: nil)
+            videoLinkURLs: nil,
+            enterChatforum: true)
         
         return chatforum.save(on: req.db).map { chatforum }.flatMap { s -> EventLoopFuture<Subject> in
             return chatforum_detail.save(on: req.db).map { s }

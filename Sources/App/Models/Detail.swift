@@ -10,6 +10,9 @@ final class Detail: Model, Content {
     @Parent(key: "subject_id")
     var subject: Subject
     
+    @Field(key: "enter_chatforum")
+    var enterChatforum: Bool
+    
     @OptionalField(key: "html_text")
     var htmlText: String?
     
@@ -24,13 +27,14 @@ final class Detail: Model, Content {
 
     init() { }
 
-    init(id: UUID? = nil, subjectID: UUID, htmlText: String?, buttonLinkURL: String?, swipeableTexts: [String]?, videoLinkURLs: [LinkURL]?) {
+    init(id: UUID? = nil, subjectID: UUID, htmlText: String?, buttonLinkURL: String?, swipeableTexts: [String]?, videoLinkURLs: [LinkURL]?, enterChatforum: Bool = false) {
         self.id = id
         self.$subject.id = subjectID
         self.htmlText = htmlText
         self.buttonLinkURL = buttonLinkURL
         self.swipeableTexts = swipeableTexts
         self.videoLinkURLs = videoLinkURLs
+        self.enterChatforum = enterChatforum
     }
 }
 
