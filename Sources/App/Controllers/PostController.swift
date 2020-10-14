@@ -10,10 +10,19 @@ struct PostController: RouteCollection, PushManageable {
         posts.get(":id", use: getPost)
         posts.post("create", use: createPost)
         posts.post(":id", "comment", "create" , use: createComment)
+        posts.get(":id", "comments", use: getComments)
     }
     
     func getPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
-        Post.query(on: req.db).with(\.$comments).paginate(for: req)
+        Post.query(on: req.db).paginate(for: req)
+    }
+    
+    func getComments(req: Request) throws -> EventLoopFuture<Page<Comment>> {
+        guard let id = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest)
+        }
+        
+        return Comment.query(on: req.db).filter(\.$post.$id == id).paginate(for: req)
     }
     
     func getPost(req: Request) throws -> EventLoopFuture<Post.Output> {
