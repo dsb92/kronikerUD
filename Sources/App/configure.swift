@@ -28,6 +28,7 @@ public func configure(_ app: Application) throws {
     app.migrations.add(CreateNotificationEvent())
     app.migrations.add(CreateNotification())
     app.migrations.add(CreateChannel())
+    app.migrations.add(CreatePostFilter())
     
     // Fields
     app.migrations.add(SubjectAddBackgroundColor())

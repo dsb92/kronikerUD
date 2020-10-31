@@ -10,4 +10,6 @@ func routes(_ app: Application) throws {
     try app.register(collection: NotificationEventController())
     try app.register(collection: NotificationController())
     try app.register(collection: ChannelController())
+    try app.register(collection: PostFilterController())
+    try app.register(collection: ChannelFilterController())
 }

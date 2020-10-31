@@ -17,7 +17,7 @@ struct ChannelController: RouteCollection {
     }
     
     func getMainChannelPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
-        Post.query(on: req.db).filter(\.$channel.$id == .null).with(\.$comments).paginate(for: req)
+        Post.query(on: req.db).filter(\.$channel.$id == .null).paginate(for: req)
     }
     
     func getChannelPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
@@ -50,14 +50,17 @@ struct ChannelController: RouteCollection {
         let post = Post(channelID: channelID, deviceID: appHeaders.deviceID, text: input.text)
         return post.save(on: req.db).flatMap {
             return PushDevice.find(appHeaders.deviceID, on: req.db)
-            .flatMap { device in
-                if device != nil {
-                    let event = NotificationEvent(pushTokenID: device!.$pushToken.id, eventID: post.id!)
-                    return event.save(on: req.db)
+                .flatMap { device in
+                    if device != nil {
+                        let event = NotificationEvent(pushTokenID: device!.$pushToken.id, eventID: post.id!)
+                        return event.save(on: req.db)
+                    }
+                    return req.eventLoop.makeSucceededFuture(())
                 }
-                return req.eventLoop.makeSucceededFuture(())
-            }
-            .map { Post.Output(id: post.id, deviceID: post.deviceID, text: post.text, updatedAt: post.updatedAt, channelID: post.$channel.id) }
+                .flatMap { // Create or update my post filter
+                    return PostFilter(postID: post.id!, deviceID: post.deviceID, postFilterType: PostFilter.FilterType.myPost).create(on: req.db)
+                }
+                .map { Post.Output(id: post.id, deviceID: post.deviceID, text: post.text, updatedAt: post.updatedAt, channelID: post.$channel.id) }
         }
     }
 }
