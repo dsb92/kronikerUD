@@ -14,7 +14,7 @@ struct PostController: RouteCollection, PushManageable {
     }
     
     func getPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
-        Post.query(on: req.db).paginate(for: req)
+        Post.query(on: req.db).sort(\.$updatedAt, .descending).paginate(for: req)
     }
     
     func getComments(req: Request) throws -> EventLoopFuture<Page<Comment>> {
@@ -22,7 +22,7 @@ struct PostController: RouteCollection, PushManageable {
             throw Abort(.badRequest)
         }
         
-        return Comment.query(on: req.db).filter(\.$post.$id == id).paginate(for: req)
+        return Comment.query(on: req.db).filter(\.$post.$id == id).sort(\.$updatedAt).paginate(for: req)
     }
     
     func getPost(req: Request) throws -> EventLoopFuture<Post.Output> {

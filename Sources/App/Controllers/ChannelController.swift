@@ -13,18 +13,26 @@ struct ChannelController: RouteCollection {
     }
     
     func getChannels(req: Request) throws -> EventLoopFuture<Page<Channel>> {
-        Channel.query(on: req.db).paginate(for: req)
+        return Channel.query(on: req.db)
+            .sort(\.$text)
+            .paginate(for: req)
     }
     
     func getMainChannelPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
-        Post.query(on: req.db).filter(\.$channel.$id == .null).paginate(for: req)
+        return Post.query(on: req.db)
+            .filter(\.$channel.$id == .null)
+            .sort(\.$updatedAt, .descending)
+            .paginate(for: req)
     }
     
     func getChannelPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest)
         }
-        return Post.query(on: req.db).filter(\.$channel.$id == id).paginate(for: req)
+        return Post.query(on: req.db)
+            .filter(\.$channel.$id == id)
+            .sort(\.$updatedAt, .descending)
+            .paginate(for: req)
     }
     
     func getChannel(req: Request) throws -> EventLoopFuture<Channel.Output> {

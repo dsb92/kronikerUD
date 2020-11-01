@@ -13,6 +13,7 @@ struct ChannelFilterController: RouteCollection {
     func getMyChannels(_ req: Request)throws -> EventLoopFuture<Page<Channel>> {
         return try Channel.query(on: req.db)
             .filter(\.$deviceID == req.getAppHeaders().deviceID)
+            .sort(\.$text)
             .paginate(for: req)
     }
 }
