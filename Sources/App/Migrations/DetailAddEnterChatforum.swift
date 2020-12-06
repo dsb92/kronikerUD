@@ -10,7 +10,7 @@ struct DetailAddEnterChatforum: Migration {
     // Optionally reverts the changes made in the prepare method.
     func revert(on database: Database) -> EventLoopFuture<Void> {
         database.schema("details")
-            .field("enter_chatforum", .string, .required)
-            .update()
+            .field("enter_chatforum", .string, .required, .sql(.default(false)))
+            .delete()
     }
 }

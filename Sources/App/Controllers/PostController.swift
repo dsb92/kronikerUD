@@ -1,53 +1,48 @@
 import Fluent
 import Vapor
 
-struct PostController: RouteCollection, PushManageable {
+struct PostController: RouteCollection, PushManageable, CommentsManagable, PostManagable {
     var pushProvider: PushProvider! = FCMProvider()
     
     func boot(routes: RoutesBuilder) throws {
         let posts = routes.grouped("posts")
+        let comments = routes.grouped("comments")
+        
         posts.get(use: getPosts)
         posts.get(":id", use: getPost)
         posts.post("create", use: createPost)
         posts.post(":id", "comment", "create" , use: createComment)
         posts.get(":id", "comments", use: getComments)
+        posts.delete(":id", "delete", use: deletePost)
+        
+        comments.delete(":id", "delete", use: deleteComment)
     }
     
     func getPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
-        Post.query(on: req.db).sort(\.$updatedAt, .descending).paginate(for: req)
+        Post.query(on: req.db)
+            .sort(\.$updatedAt, .descending)
+            .paginate(for: req)
     }
     
     func getComments(req: Request) throws -> EventLoopFuture<Page<Comment>> {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest)
         }
-        
-        return Comment.query(on: req.db).filter(\.$post.$id == id).sort(\.$updatedAt).paginate(for: req)
+        return Comment.query(on: req.db)
+            .filter(\.$post.$id == id)
+            .sort(\.$updatedAt)
+            .paginate(for: req)
     }
     
     func getPost(req: Request) throws -> EventLoopFuture<Post.Output> {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest)
         }
-        return Post.find(id, on: req.db).unwrap(or: Abort(.notFound)).map { Post.Output(id: $0.id, deviceID: $0.deviceID, text: $0.text, updatedAt: $0.updatedAt, channelID: $0.$channel.id) }
+        return Post.find(id, on: req.db).unwrap(or: Abort(.notFound)).map { Post.Output(id: $0.id, deviceID: $0.deviceID, text: $0.text, numberOfComments: $0.numberOfComments, updatedAt: $0.updatedAt, channelID: $0.$channel.id) }
     }
     
     func createPost(req: Request) throws -> EventLoopFuture<Post.Output> {
-        let appHeaders = try req.getAppHeaders()
-        let input = try req.content.decode(Post.Input.self)
-        let post = Post(deviceID: appHeaders.deviceID, text: input.text)
-        return post.save(on: req.db).flatMap {
-            return PushDevice.find(appHeaders.deviceID, on: req.db)
-                .flatMap { device in
-                    guard let device = device else { return req.eventLoop.makeSucceededFuture(()) }
-                    let event = NotificationEvent(pushTokenID: device.$pushToken.id, eventID: post.id!)
-                    return event.save(on: req.db)
-                }
-                .flatMap { // Create or update my post filter
-                    return PostFilter(postID: post.id!, deviceID: post.deviceID, postFilterType: PostFilter.FilterType.myPost).create(on: req.db)
-                }
-                .map { Post.Output(id: post.id, deviceID: post.deviceID, text: post.text, updatedAt: post.updatedAt) }
-        }
+        try createPost(req: req, channelID: nil)
     }
     
     func createComment(req: Request) throws -> EventLoopFuture<Comment.Output> {
@@ -58,8 +53,9 @@ struct PostController: RouteCollection, PushManageable {
         let input = try req.content.decode(Comment.Input.self)
         let comment = Comment(postID: postID, deviceID: appHeaders.deviceID, text: input.text)
         return comment.save(on: req.db).flatMap {
-            return comment.$post.query(on: req.db).first().flatMap { post in
-                return PushDevice.find(post!.deviceID, on: req.db)
+            return comment.$post.query(on: req.db).first().unwrap(or: Abort(.notFound, reason: "Post with id \(postID) no longer exists")).flatMap { post in
+                return PushDevice.find(post.deviceID, on: req.db)
+                    // Send push notification if needed
                     .flatMap { device in
                         guard let device = device else { return req.eventLoop.makeSucceededFuture(()) }
                         // Check if comment is created by owner of Post. We don't want to send push to ourselves :)
@@ -68,11 +64,12 @@ struct PostController: RouteCollection, PushManageable {
                         }
                         return req.eventLoop.makeSucceededFuture(())
                     }
-                    .flatMap { // Create or update my post filter
-                        return PostFilter.query(on: req.db)
+                    // Create or update my post filter
+                    .flatMap {
+                        PostFilter.query(on: req.db)
                             .join(Post.self, on: \PostFilter.$postID == \Post.$id)
                             .filter(\.$deviceID == appHeaders.deviceID)
-                            .filter(\.$postID == post!.id!)
+                            .filter(\.$postID == post.id!)
                             .filter(\.$postFilterType == .myComments)
                             .first()
                             .flatMap { first in
@@ -80,9 +77,52 @@ struct PostController: RouteCollection, PushManageable {
                                 return PostFilter(postID: comment.$post.id, deviceID: appHeaders.deviceID, postFilterType: PostFilter.FilterType.myComments).create(on: req.db)
                             }
                     }
+                    // Update number of comments
+                    .flatMap {
+                        addComment(numberOfComments: &post.numberOfComments)
+                        return post.save(on: req.db)
+                    }
                     .map { $0 }
             }
         }
         .map { Comment.Output(id: comment.id, deviceID: comment.deviceID, text: comment.text, updatedAt: comment.updatedAt) }
+    }
+    
+    func deleteComment(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        guard let id = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Missing id in path")
+        }
+        return Comment
+            .find(id, on: req.db)
+            .unwrap(or: Abort(.notFound, reason: "Comment with id \(id) not found"))
+            .flatMap { comment in
+                comment.$post.query(on: req.db).first().unwrap(or: Abort(.notFound, reason: "Comment doesn't belong to a post anymore")).flatMap { post in
+                    return comment.delete(on: req.db).flatMap {
+                        deleteComment(numberOfComments: &post.numberOfComments)
+                        return post.update(on: req.db)
+                    }
+                }
+            }
+            .map { HTTPStatus.ok }
+    }
+    
+    func deletePost(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        guard let id = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest, reason: "Missing id in path")
+        }
+        return Post
+            .find(id, on: req.db)
+            .unwrap(or: Abort(.notFound, reason: "Post with id \(id) not found"))
+            .flatMap { post in
+                // Delete associated notification events
+                NotificationEvent.query(on: req.db).filter(\.$eventID == post.id!).delete().flatMap {
+                    // Delete associate filters
+                    PostFilter.query(on: req.db).filter(\.$postID == post.id!).delete().flatMap {
+                        // Delete post
+                        post.delete(on: req.db)
+                    }
+                }
+            }
+            .map { HTTPStatus.ok }
     }
 }

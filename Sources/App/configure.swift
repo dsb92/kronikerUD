@@ -34,6 +34,7 @@ public func configure(_ app: Application) throws {
     app.migrations.add(SubjectAddBackgroundColor())
     app.migrations.add(PostAddChannel())
     app.migrations.add(DetailAddEnterChatforum())
+    app.migrations.add(PostAddNumberOfComments())
 
     // Middleware
     app.middleware.use(SecretMiddleware(username: Environment.get("BASIC_AUTH_USER") ?? "", password: Environment.get("BASIC_AUTH_PASS") ?? ""))

@@ -2,8 +2,6 @@ import Fluent
 import Vapor
 
 struct ChannelFilterController: RouteCollection {
-    typealias Model = PostFilter
-    
     func boot(routes: RoutesBuilder) throws {
         let channels = routes.grouped("channels")
         channels.get("filter", "myChannels", use: getMyChannels)

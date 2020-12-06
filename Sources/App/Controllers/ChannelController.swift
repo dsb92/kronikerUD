@@ -1,7 +1,7 @@
 import Fluent
 import Vapor
 
-struct ChannelController: RouteCollection {
+struct ChannelController: RouteCollection, PostManagable {
     func boot(routes: RoutesBuilder) throws {
         let channels = routes.grouped("channels")
         channels.get(use: getChannels)
@@ -13,13 +13,13 @@ struct ChannelController: RouteCollection {
     }
     
     func getChannels(req: Request) throws -> EventLoopFuture<Page<Channel>> {
-        return Channel.query(on: req.db)
+        Channel.query(on: req.db)
             .sort(\.$text)
             .paginate(for: req)
     }
     
     func getMainChannelPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
-        return Post.query(on: req.db)
+        Post.query(on: req.db)
             .filter(\.$channel.$id == .null)
             .sort(\.$updatedAt, .descending)
             .paginate(for: req)
@@ -53,22 +53,6 @@ struct ChannelController: RouteCollection {
         guard let channelID = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest)
         }
-        let appHeaders = try req.getAppHeaders()
-        let input = try req.content.decode(Post.Input.self)
-        let post = Post(channelID: channelID, deviceID: appHeaders.deviceID, text: input.text)
-        return post.save(on: req.db).flatMap {
-            return PushDevice.find(appHeaders.deviceID, on: req.db)
-                .flatMap { device in
-                    if device != nil {
-                        let event = NotificationEvent(pushTokenID: device!.$pushToken.id, eventID: post.id!)
-                        return event.save(on: req.db)
-                    }
-                    return req.eventLoop.makeSucceededFuture(())
-                }
-                .flatMap { // Create or update my post filter
-                    return PostFilter(postID: post.id!, deviceID: post.deviceID, postFilterType: PostFilter.FilterType.myPost).create(on: req.db)
-                }
-                .map { Post.Output(id: post.id, deviceID: post.deviceID, text: post.text, updatedAt: post.updatedAt, channelID: post.$channel.id) }
-        }
+        return try createPost(req: req, channelID: channelID)
     }
 }
