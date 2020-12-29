@@ -30,6 +30,7 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
         }
         return Comment.query(on: req.db)
             .filter(\.$post.$id == id)
+            .with(\.$post)
             .sort(\.$createdAt)
             .paginate(for: req)
     }
