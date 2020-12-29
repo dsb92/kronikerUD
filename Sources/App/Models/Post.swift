@@ -12,6 +12,7 @@ final class Post: Model, Content {
         let deviceID: UUID
         let text: String
         let numberOfComments: Int
+        var createdAt: Date?
         var updatedAt: Date?
         var channelID: UUID?
     }
@@ -33,6 +34,9 @@ final class Post: Model, Content {
     @Field(key: "numberOfComments")
     var numberOfComments: Int
     
+    @Timestamp(key: "created_at", on: .create)
+    var createdAt: Date?
+    
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
     
@@ -41,12 +45,13 @@ final class Post: Model, Content {
     
     init() { }
 
-    init(id: UUID? = nil, channelID: UUID? = nil, deviceID: UUID, text: String, numberOfComments: Int, updatedAt: Date? = nil) {
+    init(id: UUID? = nil, channelID: UUID? = nil, deviceID: UUID, text: String, numberOfComments: Int, createdAt: Date? = nil, updatedAt: Date? = nil) {
         self.id = id
         self.$channel.id = channelID
         self.deviceID = deviceID
         self.text = text
         self.numberOfComments = numberOfComments
+        self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
 }

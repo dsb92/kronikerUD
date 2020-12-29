@@ -11,6 +11,7 @@ final class Comment: Model, Content {
         let deviceID: UUID
         let text: String
         let rowID: Int
+        var createdAt: Date?
         var updatedAt: Date?
     }
     
@@ -31,17 +32,21 @@ final class Comment: Model, Content {
     @Field(key: "row_id")
     var rowID: Int
     
+    @Timestamp(key: "created_at", on: .create)
+    var createdAt: Date?
+    
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
     
     init() { }
 
-    init(id: UUID? = nil, postID: UUID, deviceID: UUID, text: String, rowID: Int, updatedAt: Date? = nil) {
+    init(id: UUID? = nil, postID: UUID, deviceID: UUID, text: String, rowID: Int, createdAt: Date? = nil, updatedAt: Date? = nil) {
         self.id = id
         self.$post.id = postID
         self.deviceID = deviceID
         self.text = text
         self.rowID = rowID
+        self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
 }

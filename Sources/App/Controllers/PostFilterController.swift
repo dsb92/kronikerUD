@@ -36,7 +36,7 @@ struct PostFilterController: RouteCollection, ApiController {
             .join(PostFilter.self, on: \PostFilter.$postID == \Post.$id)
             .filter(PostFilter.self, \PostFilter.$deviceID == req.getAppHeaders().deviceID)
             .filter(PostFilter.self, \PostFilter.$postFilterType == type)
-            .sort(\.$updatedAt, .descending)
+            .sort(\.$createdAt, .descending)
             .with(\.$channel)
             .paginate(for: req)
     }

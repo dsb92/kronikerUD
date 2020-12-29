@@ -7,6 +7,7 @@ struct CreateComment: Migration {
             .field("post_id", .uuid, .references("posts", "id"))
             .field("device_id", .uuid, .required)
             .field("text", .string, .required)
+            .field("created_at", .datetime, .required)
             .field("updated_at", .datetime, .required)
             .create()
     }

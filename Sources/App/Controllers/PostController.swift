@@ -20,7 +20,7 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
     
     func getPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
         Post.query(on: req.db)
-            .sort(\.$updatedAt, .descending)
+            .sort(\.$createdAt, .descending)
             .paginate(for: req)
     }
     
@@ -30,7 +30,7 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
         }
         return Comment.query(on: req.db)
             .filter(\.$post.$id == id)
-            .sort(\.$updatedAt)
+            .sort(\.$createdAt)
             .paginate(for: req)
     }
     
@@ -40,7 +40,7 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
         }
         return Post.find(id, on: req.db)
             .unwrap(or: Abort(.notFound))
-            .map { Post.Output(id: $0.id, deviceID: $0.deviceID, text: $0.text, numberOfComments: $0.numberOfComments, updatedAt: $0.updatedAt, channelID: $0.$channel.id) }
+            .map { Post.Output(id: $0.id, deviceID: $0.deviceID, text: $0.text, numberOfComments: $0.numberOfComments, createdAt: $0.createdAt, updatedAt: $0.updatedAt, channelID: $0.$channel.id) }
     }
     
     func createPost(req: Request) throws -> EventLoopFuture<Post.Output> {
@@ -101,7 +101,7 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
                     .map { $0 }
             }
         }
-        .map { Comment.Output(id: comment.id, deviceID: comment.deviceID, text: comment.text, rowID: comment.rowID, updatedAt: comment.updatedAt) }
+        .map { Comment.Output(id: comment.id, deviceID: comment.deviceID, text: comment.text, rowID: comment.rowID, createdAt: comment.createdAt, updatedAt: comment.updatedAt) }
     }
     
     func deleteComment(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {

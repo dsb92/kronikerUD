@@ -21,7 +21,7 @@ struct ChannelController: RouteCollection, PostManagable {
     func getMainChannelPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
         Post.query(on: req.db)
             .filter(\.$channel.$id == .null)
-            .sort(\.$updatedAt, .descending)
+            .sort(\.$createdAt, .descending)
             .paginate(for: req)
     }
     
@@ -31,7 +31,7 @@ struct ChannelController: RouteCollection, PostManagable {
         }
         return Post.query(on: req.db)
             .filter(\.$channel.$id == id)
-            .sort(\.$updatedAt, .descending)
+            .sort(\.$createdAt, .descending)
             .paginate(for: req)
     }
     
@@ -39,14 +39,14 @@ struct ChannelController: RouteCollection, PostManagable {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest)
         }
-        return Channel.find(id, on: req.db).unwrap(or: Abort(.notFound)).map { Channel.Output(id: $0.id, deviceID: $0.deviceID, text: $0.text, updatedAt: $0.updatedAt) }
+        return Channel.find(id, on: req.db).unwrap(or: Abort(.notFound)).map { Channel.Output(id: $0.id, deviceID: $0.deviceID, text: $0.text, createdAt: $0.createdAt, updatedAt: $0.updatedAt) }
     }
     
     func createChannel(req: Request) throws -> EventLoopFuture<Channel.Output> {
         let appHeaders = try req.getAppHeaders()
         let input = try req.content.decode(Channel.Input.self)
         let channel = Channel(deviceID: appHeaders.deviceID, text: input.text)
-        return channel.save(on: req.db).map { Channel.Output(id: channel.id, deviceID: channel.deviceID, text: channel.text, updatedAt: channel.updatedAt) }
+        return channel.save(on: req.db).map { Channel.Output(id: channel.id, deviceID: channel.deviceID, text: channel.text, createdAt: channel.createdAt, updatedAt: channel.updatedAt) }
     }
     
     func createPost(req: Request) throws -> EventLoopFuture<Post.Output> {

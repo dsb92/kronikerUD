@@ -20,7 +20,7 @@ extension PostManagable {
                 .flatMap { // Create or update my post filter
                     PostFilter(postID: post.id!, deviceID: post.deviceID, postFilterType: PostFilter.FilterType.myPost).create(on: req.db)
                 }
-                .map { Post.Output(id: post.id, deviceID: post.deviceID, text: post.text, numberOfComments: 0, updatedAt: post.updatedAt, channelID: channelID) }
+                .map { Post.Output(id: post.id, deviceID: post.deviceID, text: post.text, numberOfComments: 0, createdAt: post.createdAt, updatedAt: post.updatedAt, channelID: channelID) }
         }
     }
 }

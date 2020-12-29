@@ -6,6 +6,7 @@ struct CreatePost: Migration {
             .id()
             .field("device_id", .uuid, .required)
             .field("text", .string, .required)
+            .field("created_at", .datetime, .required)
             .field("updated_at", .datetime, .required)
             .create()
     }
