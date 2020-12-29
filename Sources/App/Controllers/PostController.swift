@@ -38,7 +38,9 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
         guard let id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest)
         }
-        return Post.find(id, on: req.db).unwrap(or: Abort(.notFound)).map { Post.Output(id: $0.id, deviceID: $0.deviceID, text: $0.text, numberOfComments: $0.numberOfComments, updatedAt: $0.updatedAt, channelID: $0.$channel.id) }
+        return Post.find(id, on: req.db)
+            .unwrap(or: Abort(.notFound))
+            .map { Post.Output(id: $0.id, deviceID: $0.deviceID, text: $0.text, numberOfComments: $0.numberOfComments, updatedAt: $0.updatedAt, channelID: $0.$channel.id) }
     }
     
     func createPost(req: Request) throws -> EventLoopFuture<Post.Output> {
@@ -51,15 +53,29 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
         }
         let appHeaders = try req.getAppHeaders()
         let input = try req.content.decode(Comment.Input.self)
-        let comment = Comment(postID: postID, deviceID: appHeaders.deviceID, text: input.text)
-        return comment.save(on: req.db).flatMap {
+
+        return Comment.query(on: req.db).filter(\.$post.$id == postID).filter(\.$deviceID == appHeaders.deviceID).first().flatMap { initialComment in
+            if let initialComment = initialComment {
+                let comment = Comment(postID: postID, deviceID: appHeaders.deviceID, text: input.text, rowID: initialComment.rowID)
+                return createComment(req: req, comment: comment, postID: postID, deviceID: appHeaders.deviceID)
+            } else {
+                return Comment.query(on: req.db).filter(\.$post.$id == postID).count().flatMap { commentCount in
+                    let comment = Comment(postID: postID, deviceID: appHeaders.deviceID, text: input.text, rowID: commentCount + 1)
+                    return createComment(req: req, comment: comment, postID: postID, deviceID: appHeaders.deviceID)
+                }
+            }
+        }
+    }
+    
+    private func createComment(req: Request, comment: Comment, postID: UUID, deviceID: UUID) -> EventLoopFuture<Comment.Output> {
+        comment.save(on: req.db).flatMap {
             return comment.$post.query(on: req.db).first().unwrap(or: Abort(.notFound, reason: "Post with id \(postID) no longer exists")).flatMap { post in
                 return PushDevice.find(post.deviceID, on: req.db)
                     // Send push notification if needed
                     .flatMap { device in
                         guard let device = device else { return req.eventLoop.makeSucceededFuture(()) }
                         // Check if comment is created by owner of Post. We don't want to send push to ourselves :)
-                        if device.id != appHeaders.deviceID {
+                        if device.id != deviceID {
                             return self.sendPush(on: req, eventID: postID, title: LocalizationManager.newCommentOnPost, body: comment.text, category: PushType.newCommentOnPost.rawValue).transform(to: ())
                         }
                         return req.eventLoop.makeSucceededFuture(())
@@ -68,13 +84,13 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
                     .flatMap {
                         PostFilter.query(on: req.db)
                             .join(Post.self, on: \PostFilter.$postID == \Post.$id)
-                            .filter(\.$deviceID == appHeaders.deviceID)
+                            .filter(\.$deviceID == deviceID)
                             .filter(\.$postID == post.id!)
                             .filter(\.$postFilterType == .myComments)
                             .first()
                             .flatMap { first in
                                 guard first == nil else { return req.eventLoop.makeSucceededFuture(()) }
-                                return PostFilter(postID: comment.$post.id, deviceID: appHeaders.deviceID, postFilterType: PostFilter.FilterType.myComments).create(on: req.db)
+                                return PostFilter(postID: comment.$post.id, deviceID: deviceID, postFilterType: PostFilter.FilterType.myComments).create(on: req.db)
                             }
                     }
                     // Update number of comments
@@ -85,7 +101,7 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
                     .map { $0 }
             }
         }
-        .map { Comment.Output(id: comment.id, deviceID: comment.deviceID, text: comment.text, updatedAt: comment.updatedAt) }
+        .map { Comment.Output(id: comment.id, deviceID: comment.deviceID, text: comment.text, rowID: comment.rowID, updatedAt: comment.updatedAt) }
     }
     
     func deleteComment(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
@@ -103,7 +119,7 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
                     }
                 }
             }
-            .map { HTTPStatus.ok }
+            .map { .noContent }
     }
     
     func deletePost(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
@@ -123,6 +139,6 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
                     }
                 }
             }
-            .map { HTTPStatus.ok }
+            .map { .noContent }
     }
 }
