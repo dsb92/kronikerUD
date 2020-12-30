@@ -31,7 +31,7 @@ public func configure(_ app: Application) throws {
     app.migrations.add(CreatePostFilter())
     
     // Fields
-    // Below can be removed when ready for production by moving all new fields to table creation migration above.
+    //TODO: Below can be removed when ready for production by moving all new fields to table creation migration above.
     app.migrations.add(SubjectAddBackgroundColor())
     app.migrations.add(PostAddChannel())
     app.migrations.add(DetailAddEnterChatforum())

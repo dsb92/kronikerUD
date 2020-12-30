@@ -4,7 +4,7 @@ struct CreateDetail: Migration {
     func prepare(on database: Database) -> EventLoopFuture<Void> {
         database.schema("details")
             .id()
-            .field("subject_id", .uuid, .references("subjects", "id"))
+            .field("subject_id", .uuid, .required, .references("subjects", "id", onDelete: .cascade))
             .field("html_text", .string)
             .field("button_link_url", .string)
             .field("swipeable_texts", .array(of: .string))

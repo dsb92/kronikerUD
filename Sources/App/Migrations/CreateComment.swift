@@ -4,7 +4,7 @@ struct CreateComment: Migration {
     func prepare(on database: Database) -> EventLoopFuture<Void> {
         database.schema("comments")
             .id()
-            .field("post_id", .uuid, .references("posts", "id"))
+            .field("post_id", .uuid, .required, .references("posts", "id", onDelete: .cascade))
             .field("device_id", .uuid, .required)
             .field("text", .string, .required)
             .field("created_at", .datetime, .required)
