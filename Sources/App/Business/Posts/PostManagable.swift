@@ -1,11 +1,21 @@
 import Fluent
 import Vapor
 
-protocol PostManagable {
+protocol PostManagable: NumberManagable {
+    func addPost(numberOfPosts: inout Int)
+    func deletePost(numberOfPosts: inout Int)
     func createPost(req: Request, channelID: UUID?) throws -> EventLoopFuture<Post.Output>
 }
 
 extension PostManagable {
+    func addPost(numberOfPosts: inout Int) {
+        increase(number: &numberOfPosts)
+    }
+    
+    func deletePost(numberOfPosts: inout Int) {
+        decrease(number: &numberOfPosts)
+    }
+    
     func createPost(req: Request, channelID: UUID?) throws -> EventLoopFuture<Post.Output> {
         let appHeaders = try req.getAppHeaders()
         let input = try req.content.decode(Post.Input.self)
@@ -20,7 +30,14 @@ extension PostManagable {
                 .flatMap { // Create or update my post filter
                     PostFilter(postID: post.id!, deviceID: post.deviceID, postFilterType: PostFilter.FilterType.myPost).create(on: req.db)
                 }
-                .map { Post.Output(id: post.id, deviceID: post.deviceID, text: post.text, numberOfComments: 0, createdAt: post.createdAt, updatedAt: post.updatedAt, channelID: channelID) }
+                .flatMap { // Update numberOfPosts if post belongs to a channel
+                    return post.$channel.query(on: req.db).first().flatMap { channel in
+                        guard let channel = channel else { return req.eventLoop.makeSucceededFuture(()) }
+                        addPost(numberOfPosts: &channel.numberOfPosts)
+                        return channel.save(on: req.db)
+                    }
+                }
+                .map { Post.Output(id: post.id, deviceID: post.deviceID, text: post.text, numberOfComments: post.numberOfComments, createdAt: post.createdAt, updatedAt: post.updatedAt, channelID: channelID) }
         }
     }
 }

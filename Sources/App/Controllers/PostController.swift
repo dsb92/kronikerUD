@@ -116,7 +116,7 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
                 comment.$post.query(on: req.db).first().unwrap(or: Abort(.notFound, reason: "Comment doesn't belong to a post anymore")).flatMap { post in
                     return comment.delete(on: req.db).flatMap {
                         deleteComment(numberOfComments: &post.numberOfComments)
-                        return post.update(on: req.db)
+                        return post.save(on: req.db)
                     }
                 }
             }
@@ -136,7 +136,14 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
                     // Delete associate filters
                     PostFilter.query(on: req.db).filter(\.$postID == post.id!).delete().flatMap {
                         // Delete post
-                        post.delete(on: req.db)
+                        post.delete(on: req.db).flatMap {
+                            // Update numberOfPosts if post belongs to a channel
+                            return post.$channel.query(on: req.db).first().flatMap { channel in
+                                guard let channel = channel else { return req.eventLoop.makeSucceededFuture(()) }
+                                deletePost(numberOfPosts: &channel.numberOfPosts)
+                                return channel.save(on: req.db)
+                            }
+                        }
                     }
                 }
             }
