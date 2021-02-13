@@ -5,6 +5,7 @@ struct CreateDetail: Migration {
         database.schema("details")
             .id()
             .field("subject_id", .uuid, .required, .references("subjects", "id", onDelete: .cascade))
+            .field("enter_chatforum", .bool, .required)
             .field("html_text", .string)
             .field("button_link_url", .string)
             .field("swipeable_texts", .array(of: .string))

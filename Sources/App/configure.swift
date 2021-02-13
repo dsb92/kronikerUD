@@ -31,13 +31,7 @@ public func configure(_ app: Application) throws {
     app.migrations.add(CreatePostFilter())
     
     // Fields
-    //TODO: Below can be removed when ready for production by moving all new fields to table creation migration above.
-    app.migrations.add(SubjectAddBackgroundColor())
-    app.migrations.add(PostAddChannel())
-    app.migrations.add(DetailAddEnterChatforum())
-    app.migrations.add(PostAddNumberOfComments())
-    app.migrations.add(CommentAddRowId())
-    app.migrations.add(ChannelAddNumberOfPosts())
+    //TODO: Migrations below can be removed when ready for production by moving all new fields to table creation migration above.
 
     // Middleware
     app.middleware.use(SecretMiddleware(username: Environment.get("BASIC_AUTH_USER") ?? "", password: Environment.get("BASIC_AUTH_PASS") ?? ""))

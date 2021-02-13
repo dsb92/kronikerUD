@@ -75,7 +75,7 @@ extension ApiController {
         let idPathComponent = PathComponent(stringLiteral: ":\(self.idKey)")
         
         base.post("create", use: self.create)
-        base.get("all", use: self.readAll)
+        base.get(use: self.readAll)
         base.get(idPathComponent, use: self.read)
         base.put(idPathComponent, "update", use: self.update)
         base.delete(idPathComponent, "delete", use: self.delete)

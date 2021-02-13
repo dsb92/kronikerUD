@@ -8,6 +8,7 @@ struct CreateChannel: Migration {
             .field("text", .string, .required)
             .field("created_at", .datetime, .required)
             .field("updated_at", .datetime, .required)
+            .field("numberOfPosts", .int, .required)
             .create()
     }
 
