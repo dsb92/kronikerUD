@@ -3,7 +3,7 @@ import Fluent
 import FCM
 
 struct FCMProvider: PushProvider {
-    func sendPush(on request: Request, notification: Notification) -> EventLoopFuture<Notification> {
+    func sendPush(on request: Request, notification: Notification) -> EventLoopFuture<Void> {
         let token = notification.token
         let fcmNotification: FCMNotification? = (notification.silent ?? false) ? nil : FCMNotification(title: notification.title, body: notification.body)
         let message = FCMMessage(token: token, notification: fcmNotification)
@@ -13,8 +13,15 @@ struct FCMProvider: PushProvider {
             message.data = data
         }
         
-        return request.fcm.send(message, on: request.eventLoop).flatMap { response in
+        let response = request.fcm.send(message, on: request.eventLoop).flatMap { response in
             return notification.create(on: request.db)
-        }.map { notification }
+        }
+        
+        response.whenFailure { error in
+            //TODO: Send mail about failure or log somewhere...
+            print(error)
+        }
+        
+        return request.eventLoop.makeSucceededFuture(())
     }
 }

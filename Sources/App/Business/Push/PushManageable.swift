@@ -3,11 +3,11 @@ import Vapor
 
 protocol PushManageable {
     var pushProvider: PushProvider! { get }
-    func sendPush(on request: Request, eventID: UUID, title: String, body: String, category: String) -> EventLoopFuture<Notification>
+    func sendPush(on request: Request, eventID: UUID, title: String, body: String, category: String) -> EventLoopFuture<Void>
 }
 
 extension PushManageable {
-    func sendPush(on request: Request, eventID: UUID, title: String, body: String, category: String) -> EventLoopFuture<Notification> {
+    func sendPush(on request: Request, eventID: UUID, title: String, body: String, category: String) -> EventLoopFuture<Void> {
         // Send push to any subscribers
         return NotificationEvent
             .query(on: request.db)
@@ -19,7 +19,7 @@ extension PushManageable {
                         return self.pushProvider.sendPush(on: request, notification: Notification(token: pushToken!.token, title: title, body: body, data: ["id": eventID.uuidString], category: category))
                     }
                 }
-                return request.eventLoop.makeSucceededFuture((.init()))
+                return request.eventLoop.makeSucceededFuture(())
         }
     }
 }

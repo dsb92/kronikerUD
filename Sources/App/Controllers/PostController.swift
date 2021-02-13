@@ -77,7 +77,7 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
                         guard let device = device else { return req.eventLoop.makeSucceededFuture(()) }
                         // Check if comment is created by owner of Post. We don't want to send push to ourselves :)
                         if device.id != deviceID {
-                            return self.sendPush(on: req, eventID: postID, title: LocalizationManager.newCommentOnPost, body: comment.text, category: PushType.newCommentOnPost.rawValue).transform(to: ())
+                            return self.sendPush(on: req, eventID: postID, title: LocalizationManager.newCommentOnPost, body: comment.text, category: PushType.newCommentOnPost.rawValue)
                         }
                         return req.eventLoop.makeSucceededFuture(())
                     }
