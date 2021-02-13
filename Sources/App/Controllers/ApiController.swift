@@ -74,11 +74,11 @@ extension ApiController {
         let base = routes.grouped(PathComponent(stringLiteral: endpoint))
         let idPathComponent = PathComponent(stringLiteral: ":\(self.idKey)")
         
-        base.post(use: self.create)
-        base.get(use: self.readAll)
+        base.post("create", use: self.create)
+        base.get("all", use: self.readAll)
         base.get(idPathComponent, use: self.read)
-        base.post(idPathComponent, use: self.update)
-        base.delete(idPathComponent, use: self.delete)
+        base.put(idPathComponent, "update", use: self.update)
+        base.delete(idPathComponent, "delete", use: self.delete)
 
         return base
     }
