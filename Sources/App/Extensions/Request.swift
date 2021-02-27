@@ -5,6 +5,7 @@ struct HttpHeaders {
     var deviceID: UUID
     var version: String
     var platform: String
+    var badgeCount: Int
 }
 
 extension Request {
@@ -12,7 +13,8 @@ extension Request {
         let deviceID = try getDeviceUUID()
         let appVersion = try getAppVersion()
         let appPlatform = try getAppPlatform()
-        return HttpHeaders(deviceID: deviceID, version: appVersion, platform: appPlatform)
+        let badgeCount = try getAppBadgeCount()
+        return HttpHeaders(deviceID: deviceID, version: appVersion, platform: appPlatform, badgeCount: badgeCount)
     }
     
     private func getDeviceUUID() throws -> UUID {
@@ -28,5 +30,10 @@ extension Request {
     private func getAppPlatform() throws -> String {
         guard let platform = self.headers["platform"].first else { throw Abort.init(.badRequest, reason: "Missing 'platform' in header") }
         return platform
+    }
+    
+    private func getAppBadgeCount() throws -> Int {
+        guard let badgeCount = self.headers["badgeCount"].first else { return 0 }
+        return Int(badgeCount) ?? 0
     }
 }

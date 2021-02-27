@@ -14,12 +14,24 @@ extension PushManageable {
             .filter(\.$eventID == eventID)
             .first()
             .flatMap { event in
-                if event != nil {
-                    return event!.$pushToken.query(on: request.db).first().flatMap { pushToken in
-                        return self.pushProvider.sendPush(on: request, notification: Notification(token: pushToken!.token, title: title, body: body, data: ["id": eventID.uuidString], category: category))
+                if let event = event {
+                    return event.$pushToken.query(on: request.db).first().flatMap { pushToken in
+                        if let pushToken = pushToken {
+                            return PushDevice.query(on: request.db)
+                                .join(PushToken.self, on: \PushDevice.$pushToken.$id == \PushToken.$id)
+                                .filter(PushToken.self, \PushToken.$id == pushToken.id!)
+                                .first()
+                                .flatMap() { pushDevice in
+                                    if let pushDevice = pushDevice {
+                                        return self.pushProvider.sendPush(on: request, notification: Notification(token: pushToken.token, title: title, body: body, data: ["id": eventID.uuidString], category: category), pushDevice: pushDevice)
+                                    }
+                                    return request.eventLoop.makeSucceededFuture(())
+                                }
+                        }
+                        return request.eventLoop.makeSucceededFuture(())
                     }
                 }
                 return request.eventLoop.makeSucceededFuture(())
-        }
+            }
     }
 }

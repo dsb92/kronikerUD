@@ -32,6 +32,7 @@ public func configure(_ app: Application) throws {
     
     // Fields
     //TODO: Migrations below can be removed when ready for production by moving all new fields to table creation migration above.
+    app.migrations.add(PushDeviceAddBadgeCount())
 
     // Middleware
     app.middleware.use(SecretMiddleware(username: Environment.get("BASIC_AUTH_USER") ?? "", password: Environment.get("BASIC_AUTH_PASS") ?? ""))

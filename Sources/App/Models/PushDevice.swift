@@ -6,6 +6,7 @@ final class PushDevice: ApiModel {
     struct _Input: Content {
         let appVersion: String
         let appPlatform: String
+        let appBadgeCount: Int
         let pushTokenID: UUID
     }
     
@@ -13,6 +14,7 @@ final class PushDevice: ApiModel {
         var id: UUID?
         let appVersion: String
         let appPlatform: String
+        let appBadgeCount: Int
         let pushToken: PushToken
     }
     
@@ -30,15 +32,19 @@ final class PushDevice: ApiModel {
     @Field(key: "app_platform")
     var appPlatform: String
     
+    @Field(key: "app_badge_count")
+    var appBadgeCount: Int
+    
     @Parent(key: "push_token_id")
     var pushToken: PushToken
     
     init() { }
 
-    init(id: UUID? = nil, appVersion: String, appPlatform: String, pushTokenID: UUID) {
+    init(id: UUID? = nil, appVersion: String, appPlatform: String, pushTokenID: UUID, appBadgeCount: Int) {
         self.id = id
         self.appVersion = appVersion
         self.appPlatform = appPlatform
+        self.appBadgeCount = appBadgeCount
         self.$pushToken.id = pushTokenID
     }
     
@@ -47,16 +53,18 @@ final class PushDevice: ApiModel {
     init(_ input: Input) throws {
         self.appVersion = input.appVersion
         self.appPlatform = input.appPlatform
+        self.appBadgeCount = input.appBadgeCount
         self.$pushToken.id = input.pushTokenID
     }
     
     func update(_ input: Input) throws {
         self.appVersion = input.appVersion
         self.appPlatform = input.appPlatform
+        self.appBadgeCount = input.appBadgeCount
         self.$pushToken.id = input.pushTokenID
     }
     
     var output: Output {
-        .init(id: self.id, appVersion: self.appVersion, appPlatform: self.appPlatform, pushToken: self.pushToken)
+        .init(id: self.id, appVersion: self.appVersion, appPlatform: self.appPlatform, appBadgeCount: self.appBadgeCount, pushToken: self.pushToken)
     }
 }

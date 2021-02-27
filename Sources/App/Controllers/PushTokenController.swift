@@ -15,11 +15,12 @@ struct PushTokenController: RouteCollection, ApiController {
             PushDevice.find(appHeaders.deviceID, on: req.db)
                 .flatMap { existing in
                     guard let existing = existing else {
-                        let newPushDevice = PushDevice(id: appHeaders.deviceID, appVersion: appHeaders.version, appPlatform: appHeaders.platform, pushTokenID: pushToken.id!)
+                        let newPushDevice = PushDevice(id: appHeaders.deviceID, appVersion: appHeaders.version, appPlatform: appHeaders.platform, pushTokenID: pushToken.id!, appBadgeCount: appHeaders.badgeCount)
                         return newPushDevice.create(on: req.db)
                     }
                     existing.appPlatform = appHeaders.platform
                     existing.appVersion = appHeaders.version
+                    existing.appBadgeCount = appHeaders.badgeCount
                     existing.$pushToken.id = pushToken.id!
                     return existing.save(on: req.db)
                 }
