@@ -14,7 +14,9 @@ let package = Package(
         // 🔵 Swift ORM (queries, models, relations, etc) built on SQLite 3.
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.0.0-rc"),
         // Firebase Cloud Messaging
-        .package(url: "https://github.com/MihaelIsaev/FCM.git", from: "2.7.0")
+        .package(url: "https://github.com/MihaelIsaev/FCM.git", from: "2.7.0"),
+        // Backtrace
+        .package(url: "https://github.com/swift-server/swift-backtrace.git", from: "1.2.1")
     ],
     targets: [
         .target(
@@ -23,7 +25,8 @@ let package = Package(
                 .product(name: "Fluent", package: "fluent"),
                 .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
                 .product(name: "Vapor", package: "vapor"),
-                .product(name: "FCM", package: "FCM")
+                .product(name: "FCM", package: "FCM"),
+                .product(name: "Backtrace", package: "swift-backtrace")
             ],
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of
