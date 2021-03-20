@@ -38,12 +38,12 @@ final class NotificationEvent: ApiModel {
     
     // MARK: - api
     
-    init(_ input: Input) throws {
+    init(_ input: Input, _: HttpHeaders) throws {
         self.$pushToken.id = input.pushTokenID
         self.eventID = input.eventID
     }
     
-    func update(_ input: Input) throws {
+    func update(_ input: Input, _: HttpHeaders) throws {
         self.$pushToken.id = input.pushTokenID
         self.eventID = input.eventID
     }

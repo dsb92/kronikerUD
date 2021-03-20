@@ -38,12 +38,12 @@ final class AllowedDevice: ApiModel {
     
     // MARK: - api
     
-    init(_ input: Input) throws {
+    init(_ input: Input, _: HttpHeaders) throws {
         self.version = input.version
         self.platform = input.platform
     }
     
-    func update(_ input: Input) throws {
+    func update(_ input: Input, _: HttpHeaders) throws {
         self.version = input.version
         self.platform = input.platform
     }

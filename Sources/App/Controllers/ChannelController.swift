@@ -1,7 +1,7 @@
 import Fluent
 import Vapor
 
-struct ChannelController: RouteCollection, PostManagable {
+struct ChannelController: RouteCollection, PostManagable, BlockingManageable {
     func boot(routes: RoutesBuilder) throws {
         let channels = routes.grouped("channels")
         channels.get(use: getChannels)
@@ -20,20 +20,22 @@ struct ChannelController: RouteCollection, PostManagable {
     }
     
     func getMainChannelPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
-        Post.query(on: req.db)
+        let posts = Post.query(on: req.db)
             .filter(\.$channel.$id == .null)
             .sort(\.$createdAt, .descending)
             .paginate(for: req)
+        return try getPostsBlockingManaged(posts: posts, req: req)
     }
     
     func getChannelPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest)
         }
-        return Post.query(on: req.db)
+        let posts = Post.query(on: req.db)
             .filter(\.$channel.$id == id)
             .sort(\.$createdAt, .descending)
             .paginate(for: req)
+        return try getPostsBlockingManaged(posts: posts, req: req)
     }
     
     func getChannel(req: Request) throws -> EventLoopFuture<Channel.Output> {

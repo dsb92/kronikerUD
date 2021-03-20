@@ -70,7 +70,7 @@ final class Notification: ApiModel {
     
     // MARK: - api
     
-    init(_ input: Input) throws {
+    init(_ input: Input, _: HttpHeaders) throws {
         self.token = input.token
         self.title = input.title
         self.body = input.body
@@ -80,7 +80,7 @@ final class Notification: ApiModel {
         self.mutableContent = input.mutableContent
     }
     
-    func update(_ input: Input) throws {
+    func update(_ input: Input, _: HttpHeaders) throws {
         self.token = input.token
         self.title = input.title
         self.body = input.body

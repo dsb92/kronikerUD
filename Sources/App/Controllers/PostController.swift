@@ -1,7 +1,7 @@
 import Fluent
 import Vapor
 
-struct PostController: RouteCollection, PushManageable, CommentsManagable, PostManagable {
+struct PostController: RouteCollection, PushManageable, CommentsManagable, PostManagable, BlockingManageable {
     var pushProvider: PushProvider! = FCMProvider()
     
     func boot(routes: RoutesBuilder) throws {
@@ -19,20 +19,22 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
     }
     
     func getPosts(req: Request) throws -> EventLoopFuture<Page<Post>> {
-        Post.query(on: req.db)
+        let posts = Post.query(on: req.db)
             .sort(\.$createdAt, .descending)
             .paginate(for: req)
+        return try getPostsBlockingManaged(posts: posts, req: req)
     }
     
     func getComments(req: Request) throws -> EventLoopFuture<Page<Comment>> {
         guard let id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest)
         }
-        return Comment.query(on: req.db)
+        let comments = Comment.query(on: req.db)
             .filter(\.$post.$id == id)
             .with(\.$post)
             .sort(\.$createdAt)
             .paginate(for: req)
+        return try getCommentsBlockingManaged(comments: comments, req: req)
     }
     
     func getPost(req: Request) throws -> EventLoopFuture<Post.Output> {

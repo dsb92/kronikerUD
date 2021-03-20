@@ -23,6 +23,9 @@ final class PushToken: ApiModel {
     @Children(for: \.$pushToken)
     var notificationEvents: [NotificationEvent]
     
+    @Children(for: \.$pushToken)
+    var pushDevices: [PushDevice]
+    
     @Field(key: "token")
     var token: String
     
@@ -35,11 +38,11 @@ final class PushToken: ApiModel {
     
     // MARK: - api
     
-    init(_ input: Input) throws {
+    init(_ input: Input, _: HttpHeaders) throws {
         self.token = input.token
     }
     
-    func update(_ input: Input) throws {
+    func update(_ input: Input, _: HttpHeaders) throws {
         self.token = input.token
     }
     

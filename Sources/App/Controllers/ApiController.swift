@@ -42,7 +42,8 @@ extension ApiController {
 
     func create(_ req: Request) throws -> EventLoopFuture<Model.Output> {
         let request = try req.content.decode(Model.Input.self)
-        let model = try Model(request)
+        let headers = try req.getAppHeaders()
+        let model = try Model(request, headers)
         return model.save(on: req.db).map { _ in model.output }
     }
     
@@ -56,8 +57,9 @@ extension ApiController {
 
     func update(_ req: Request) throws -> EventLoopFuture<Model.Output> {
         let request = try req.content.decode(Model.Input.self)
+        let headers = try req.getAppHeaders()
         return try self.find(req).flatMapThrowing { model -> Model in
-            try model.update(request)
+            try model.update(request, headers)
             return model
         }
         .flatMap { model in

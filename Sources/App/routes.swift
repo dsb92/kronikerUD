@@ -12,4 +12,5 @@ func routes(_ app: Application) throws {
     try app.register(collection: ChannelController())
     try app.register(collection: PostFilterController())
     try app.register(collection: ChannelFilterController())
+    try app.register(collection: BlockedDeviceController())
 }

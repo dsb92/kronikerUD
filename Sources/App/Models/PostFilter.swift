@@ -56,13 +56,13 @@ final class PostFilter: ApiModel {
     
     // MARK: - api
     
-    init(_ input: Input) throws {
+    init(_ input: Input, _: HttpHeaders) throws {
         self.postID = input.postID
         self.deviceID = input.deviceID
         self.postFilterType = input.postFilterType
     }
     
-    func update(_ input: Input) throws {
+    func update(_ input: Input, _: HttpHeaders) throws {
         self.postID = input.postID
         self.deviceID = input.deviceID
         self.postFilterType = input.postFilterType

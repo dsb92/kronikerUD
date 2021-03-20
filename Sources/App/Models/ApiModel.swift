@@ -5,7 +5,7 @@ protocol ApiModel: Model {
     associatedtype Input: Content
     associatedtype Output: Content
 
-    init(_: Input) throws
+    init(_: Input, _: HttpHeaders) throws
     var output: Output { get }
-    func update(_: Input) throws
+    func update(_: Input, _: HttpHeaders) throws
 }

@@ -14,7 +14,7 @@ public func configure(_ app: Application) throws {
     var config = PostgresConfiguration(url: Environment.databaseURL)!
     config.tlsConfiguration = TLSConfiguration.forClient(certificateVerification: .none)
     app.databases.use(.postgres(configuration: config), as: .psql)
-    // SSL won't work on local machine
+    // Uncomment below when you run locally. SSL won't work on local machine unless it's configured.
 //    try app.databases.use(.postgres(url: Environment.databaseURL), as: .psql)
     
     // Tables
@@ -29,10 +29,7 @@ public func configure(_ app: Application) throws {
     app.migrations.add(CreateNotification())
     app.migrations.add(CreateChannel())
     app.migrations.add(CreatePostFilter())
-    
-    // Fields
-    //TODO: Migrations below can be removed when ready for production by moving all new fields to table creation migration above.
-    app.migrations.add(PushDeviceAddBadgeCount())
+    app.migrations.add(CreateBlockedDevice())
 
     // Middleware
     app.middleware.use(SecretMiddleware(username: Environment.get("BASIC_AUTH_USER") ?? "", password: Environment.get("BASIC_AUTH_PASS") ?? ""))

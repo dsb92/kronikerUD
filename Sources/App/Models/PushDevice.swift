@@ -50,14 +50,14 @@ final class PushDevice: ApiModel {
     
     // MARK: - api
     
-    init(_ input: Input) throws {
+    init(_ input: Input, _: HttpHeaders) throws {
         self.appVersion = input.appVersion
         self.appPlatform = input.appPlatform
         self.appBadgeCount = input.appBadgeCount
         self.$pushToken.id = input.pushTokenID
     }
     
-    func update(_ input: Input) throws {
+    func update(_ input: Input, _: HttpHeaders) throws {
         self.appVersion = input.appVersion
         self.appPlatform = input.appPlatform
         self.appBadgeCount = input.appBadgeCount

@@ -1,7 +1,21 @@
 import Fluent
 import Vapor
 
-final class BlockedDevice: Model, Content {
+final class BlockedDevice: ApiModel {
+    
+    struct _Input: Content {
+        let blockedDeviceID: UUID
+    }
+    
+    struct _Output: Content {
+        var id: UUID?
+        let deviceID: UUID
+        let blockedDeviceID: UUID
+    }
+    
+    typealias Input = _Input
+    typealias Output = _Output
+    
     static let schema = "blocked_devices"
     
     @ID(key: .id)
@@ -19,5 +33,21 @@ final class BlockedDevice: Model, Content {
         self.id = id
         self.deviceID = deviceID
         self.blockedDeviceID = blockedDeviceID
+    }
+    
+    // MARK: - api
+    
+    init(_ input: Input, _ headers: HttpHeaders) throws {
+        self.deviceID = headers.deviceID
+        self.blockedDeviceID = input.blockedDeviceID
+    }
+    
+    func update(_ input: Input, _ headers: HttpHeaders) throws {
+        self.deviceID = headers.deviceID
+        self.blockedDeviceID = input.blockedDeviceID
+    }
+    
+    var output: Output {
+        .init(id: self.id, deviceID: self.deviceID, blockedDeviceID: self.blockedDeviceID)
     }
 }
