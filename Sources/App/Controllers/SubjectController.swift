@@ -558,8 +558,8 @@ struct SubjectController: RouteCollection {
         let gymnasieuddannelse_studietur_detalje = Detail(
             id: UUID(),
             subjectID: gymnasieuddannelse_studietur.id!,
-            htmlText: "Det er muligt at få støtte under studieture. Studieturene kan både være i Danmark og i udlandet. Du kan få støtte til én obligatorisk studietur.\nUdgifter du kan få dækket, er fx hvis du skal have en hjælper eller tegnsprogstolk med på turen; rejse, lønudgifter, ophold, diæter mm.\n\nDu kan tilgå yderligere informationer omkring økonomisk støtte til studieture.",
-            buttonLinkURL: "https://www.spsu.dk/for-sps-ansvarlige/administration-af-sps/sps-paa-studierejser-og-i-praktik",
+            htmlText: "Få støtte under studieture.\nStudieturene kan både være i Danmark og i udlandet. Du kan få støtte til én obligatorisk studietur.\nUdgifter du kan få dækket, er fx hvis du skal have en hjælper eller tegnsprogstolk med på turen; rejse, lønudgifter, ophold, diæter mm.\n\nDu kan tilgå yderligere informationer omkring økonomisk støtte til studieture.",
+            buttonLinkURL: "https://www.spsu.dk/for-sps-ansvarlige/administration-af-sps/sps-paa-studieture-og-i-praktik",
             swipeableTexts: nil,
             videoLinkURLs: nil
         )
@@ -576,7 +576,7 @@ struct SubjectController: RouteCollection {
         let gymnasieuddannelse_fritagelseForIdrætC_detalje = Detail(
             id: UUID(),
             subjectID: gymnasieuddannelse_fritagelseForIdrætC.id!,
-            htmlText: "Hvis du på grund af din sygdom vil have svært ved at deltage i undervisningen idræt C, er der mulighed for at du kan blive fritaget for undervisningen.\nInstitutionen kan træffe en afgørelse herom pga. Sagkyndige oplysninger og udtalelser.\nInstitutionen beslutter samtidig, hvilken undervisning eleven skal gennemføre i stedet for idræt C.\n\nDu kan tilgå yderligere informationer omkring fritagelse for idræt C.",
+            htmlText: "Hvis du på grund af din sygdom vil have svært ved at deltage i undervisningen idræt C, er der mulighed for at du kan blive fritaget for undervisningen. Institutionen beslutter samtidig, hvilken undervisning eleven skal gennemføre i stedet for idræt C.\n\nDu kan tilgå yderligere informationer omkring fritagelse for idræt C.",
             buttonLinkURL: "https://www.regionh.dk/ungepanel/nyheder/Sider/Nyheder/2018/fritagelse-fra-idraet-paa-stx-uddannelsen.aspx",
             swipeableTexts: nil,
             videoLinkURLs: nil
@@ -685,6 +685,14 @@ struct SubjectController: RouteCollection {
             backgroundColor: color.hexColor
         )
         
+        let erhvervsuddannelse_gode_råd_til_handicap_tillægsansøgnining = Subject(
+            id: UUID(),
+            parentID: parentID,
+            text: "Gode råd til handicaptillægsansøgning",
+            iconURL: iconPath(name: "ic_internship"),
+            backgroundColor: color.hexColor
+        )
+        
         let erhvervsuddannelse_praktik = Subject(
             id: UUID(),
             parentID: parentID,
@@ -705,7 +713,7 @@ struct SubjectController: RouteCollection {
         let erhvervsuddannelse_udvidelse_af_uddannelse_detalje = Detail(
             id: UUID(),
             subjectID: erhvervsuddannelse_udvidelse_af_uddannelse.id!,
-            htmlText: "Hvis du har brug for en længere uddannelsestid, end den uddannelsestid skolen har beregnet, kan man søge om forlængelse.\nErhvervsskolen vejleder gerne om mulighederne, og i nogle tilfælde kan skolen og det lokale uddannelsesudvalg godkende en forlængelse af uddannelsestiden uden, at der skal sendes en ansøgning til det faglige udvalg.\n\nDu kan tilgå yderligere informationer omkring udvidelse af uddannelse.",
+            htmlText: "Hvis du har brug for en længere uddannelsestid, end den uddannelsestid skolen har beregnet, kan man søge om forlængelse. Erhvervsskolen vejleder gerne om mulighederne, og i nogle tilfælde kan skolen og det lokale uddannelsesudvalg godkende en forlængelse af uddannelsestiden uden, at der skal sendes en ansøgning til det faglige udvalg.\n\nDu kan tilgå yderligere informationer omkring udvidelse af uddannelse.",
             buttonLinkURL: "https://www.uddannelsesnaevnet.dk/virksomheder/uddannelsesaftalen/afkortning-eller-forlaengelse-af-uddannelsestid",
             swipeableTexts: nil,
             videoLinkURLs: nil
@@ -714,8 +722,8 @@ struct SubjectController: RouteCollection {
         let erhvervsuddannelse_støtte_timer_hjælpemidler_detalje = Detail(
             id: UUID(),
             subjectID: erhvervsuddannelse_støtte_timer_hjælpemidler.id!,
-            htmlText: "Hvis du får bevilget studiestøttetimer, kan du fx arbejde med udvikling af strategier til at styrker og understøtte dit faglige overblik og struktur.\nDu kan få hjælp til at bruge forskellige planlægningsværktøjer, som du kan bruge, når du skal skrive opgaver eller i gang med større projekter.\n\nDu kan tilgå yderligere informationer omkring støttetimer og hjælpemidler.",
-            buttonLinkURL: "https://www.spsu.dk/for-elever-og-studerende/leverandører%20af%20støtte",
+            htmlText: "Hvis du får bevilget studiestøttetimer, kan du fx arbejde med udvikling af strategier til at styrke og understøtte dit faglige overblik og struktur. Du kan få hjælp til at bruge forskellige planlægningsværktøjer, som du kan bruge, når du skal skrive opgaver eller i gang med større projekter.\n\nDu kan tilgå yderligere informationer omkring støttetimer og hjælpemidler.",
+            buttonLinkURL: "https://www.spsu.dk/for-sps-ansvarlige/videregaaende-uddannelser/psykiske-funktionsnedsaettelser/korte-og-mellemlange-videregaaende-uddannelser/stoetteformer/stoettetimer-ved-faglig-stoettelaerer",
             swipeableTexts: nil,
             videoLinkURLs: nil
         )
@@ -732,7 +740,7 @@ struct SubjectController: RouteCollection {
         let erhvervsuddannelse_revalidering_detalje = Detail(
             id: UUID(),
             subjectID: erhvervsuddannelse_revalidering.id!,
-            htmlText: "Revalidering er både erhvervsrettede aktiviteter og økonomisk hjælp.\nRevalidering kan ske enten i form for revalidering eller når det erhvervsmæssige sigte er afklaret dvs. revalidering efter en særlig jobplan.\nAktiviteterne kan fx være arbejdsprøvning, uddannelse, optræning hos private eller offentlige arbejdsgivere eller hjælp til etablering af selvstændig virksomhed.\nDen økonomiske hjælp kan være kontanthjælp eller revalideringsydelse.\nFor at kunne få revalidering er det en forudsætning, at man har begrænsninger i arbejdsevnen, og at der ikke er andre tilbud som kan hjælpe en med at få tilknytning til arbejdsmarkedet.\n\nDu kan tilgå yderligere informationer omkring revalidering.",
+            htmlText: "Revalidering er både erhvervsrettede aktiviteter og økonomisk hjælp. Aktiviteterne kan fx være arbejdsprøvning, uddannelse, optræning hos private eller offentlige arbejdsgivere eller hjælp til etablering af selvstændig virksomhed. Den økonomiske hjælp kan være kontanthjælp eller revalideringsydelse. For at kunne få revalidering er det en forudsætning, at man har begrænsninger i arbejdsevnen, og at der ikke er andre tilbud som kan hjælpe en med at få tilknytning til arbejdsmarkedet.\n\nDu kan tilgå yderligere informationer omkring revalidering.",
             buttonLinkURL: "https://star.dk/da/indsatser-og-ordninger/indsatser-ved-sygdom-nedslidning-mv/revalidering/",
             swipeableTexts: nil,
             videoLinkURLs: nil
@@ -741,9 +749,26 @@ struct SubjectController: RouteCollection {
         let erhvervsuddannelse_handicap_tillæg_detalje = Detail(
             id: UUID(),
             subjectID: erhvervsuddannelse_handicap_tillæg.id!,
-            htmlText: "Læser du på en dansk erhvervsuddannelse og har en varig psykisk eller fysisk funktionsnedsættelse, der giver dig meget betydelige begrænsninger i evnen til at påtage dig et erhvervsarbejde, så kan du søge om at få et handicaptillæg ved siden af din SU.\nDu kan som noget nyt søge handicaptillæg i de måneder, hvor du modtager SU (grundforløbende og øvrige forløb med SU).\n\nDu kan tilgå yderligere informationer omkring handicaptillæg.",
+            htmlText: "Læser du på en dansk erhvervsuddannelse og har en varig psykisk eller fysisk funktionsnedsættelse, der giver dig meget betydelige begrænsninger i evnen til at påtage dig et erhvervsarbejde, så kan du søge om at få et handicaptillæg ved siden af din SU. Du kan som noget nyt søge handicaptillæg i de måneder, hvor du modtager SU (grundforløbende og øvrige forløb med SU).\n\nDu kan tilgå yderligere informationer omkring handicaptillæg.",
             buttonLinkURL: "https://www.su.dk/su/saerlig-stoette-til-foraeldre-handicappede-mv/handicaptillaeg/",
             swipeableTexts: nil,
+            videoLinkURLs: nil
+        )
+        
+        let erhvervsuddannelse_gode_råd_til_handicap_tillægsansøgnining_detalje = Detail(
+            id: UUID(),
+            subjectID: erhvervsuddannelse_gode_råd_til_handicap_tillægsansøgnining.id!,
+            htmlText: nil,
+            buttonLinkURL: nil,
+            swipeableTexts: [
+                "Vigtigt at den lægefaglige dokumentation som vedhæftes ansøgningen ikke er mere end 6 måneder gammel. Er den det, så sørg for at få en ny lægeerklæring fra din læge inden du ansøger.",
+                "Hvis du er i behandling i det private så være opmærksom på at det kan være dyrt at få lavet en lægeerklæring.",
+                "Hvis du er i behandling ved det offentlige er det styrelsen selv der indhenter den, samt betaler for den.",
+                "Skriv en god og motiveret ansøgning om hvorfor du mener at du er berettiget til handicaptillæg ved siden af dit studie.",
+                "Vedhæft tidligere erfaring med arbejde, lønsedler, som viser at du har måtte opsige dit arbejde efter kort tid og derved ikke har kunne have et studiejob ved siden af studiet.",
+                "Vedhæft alt hvad du har angående speciallægeudtagelser, journalnotater mm, som beskriver din diagnose/diagnoser. Hellere for meget end for lidt. Har du billeder fx fra scanninger, eller egne billeder der viser din diagnose så vedhæft gerne disse også.",
+                "Vedhæft bevis for tidligere SPS støtte – fx hvis du har fået tilkendt SPS støtte i gymnasiet eller lign."
+            ],
             videoLinkURLs: nil
         )
         
@@ -754,14 +779,14 @@ struct SubjectController: RouteCollection {
             """
             <p>AUB giver tilskud til elever:</p>
             <ul>
-            <li>Der er registreret p&aring; en erhvervsuddannelse som praktikpladss&oslash;gende</li>
-            <li>Der er optaget p&aring; en erhvervsskoles grundforl&oslash;b</li>
-            <li>Der har gennemf&oslash;rt grundforl&oslash;bet</li>
-            <li>Der deltager i undervisningen p&aring; skolepraktik</li>
+            <li>Der er registreret på en erhvervsuddannelse som praktikpladssøgende</li>
+            <li>Der er optaget på en erhvervsskoles grundforløb</li>
+            <li>Der har gennemført grundforløbet</li>
+            <li>Der deltager i undervisningen på skolepraktik</li>
             </ul>
             <p>&nbsp;</p>
             <p>AUB giver tilskud, hvis din transporttid imellem hjem og praktik eller uddannelsessted er mindst 2,5 time med offentlige transportmidler.</p>
-            <p>Du kan tilg&aring; yderligere information omkring praktik.</p>
+            <p>Du kan tilgå yderligere information omkring praktik.</p>
             """,
             buttonLinkURL: "https://www.borger.dk/skole-og-uddannelse/Erhvervsuddannelser/AUB-oversigt/AUB-praktik-danmark",
             swipeableTexts: nil,
@@ -785,6 +810,9 @@ struct SubjectController: RouteCollection {
         }
         let _ = erhvervsuddannelse_handicap_tillæg.save(on: req.db).map { erhvervsuddannelse_handicap_tillæg }.flatMap { s -> EventLoopFuture<Subject> in
             return erhvervsuddannelse_handicap_tillæg_detalje.save(on: req.db).map { s }
+        }
+        let _ = erhvervsuddannelse_gode_råd_til_handicap_tillægsansøgnining.save(on: req.db).map { erhvervsuddannelse_gode_råd_til_handicap_tillægsansøgnining }.flatMap { s -> EventLoopFuture<Subject> in
+            return erhvervsuddannelse_gode_råd_til_handicap_tillægsansøgnining_detalje.save(on: req.db).map { s }
         }
         return erhvervsuddannelse_praktik.save(on: req.db).map { erhvervsuddannelse_praktik }.flatMap { s -> EventLoopFuture<Subject> in
             return erhvervsuddannelse_praktik_detalje.save(on: req.db).map { s }
@@ -842,8 +870,8 @@ struct SubjectController: RouteCollection {
         let videregåendeuddannelse_orlov_detalje = Detail(
             id: UUID(),
             subjectID: videregåendeuddannelse_orlov.id!,
-            htmlText: "Der kan være mange forskellige grunde til at søge om orlov fx graviditet, arbejde, værnepligt eller sygdom.\nStudievejlederen på uddannelsesstedet kan rådgive dig om reglerne og ansøgningsproceduren, samt komme med gode råd.\n\nDu kan tilgå yderligere informationer omkring orlov.",
-            buttonLinkURL: "https://www.ug.dk/videregaaendeuddannelse/orlov-paa-videregaaende-uddannelser",
+            htmlText: "Der kan være mange forskellige grunde til at søge om orlov fx graviditet, arbejde, værnepligt eller sygdom. Studievejlederen på uddannelsesstedet kan rådgive dig om reglerne og ansøgningsproceduren, samt komme med gode råd.\n\nDu kan tilgå yderligere informationer omkring orlov. ",
+            buttonLinkURL: "https://www.ucl.dk/for-studerende/under-studiet/orlov",
             swipeableTexts: nil,
             videoLinkURLs: nil
         )
@@ -851,8 +879,8 @@ struct SubjectController: RouteCollection {
         let videregåendeuddannelse_støtte_timer_hjælpemidler_detalje = Detail(
             id: UUID(),
             subjectID: videregåendeuddannelse_støtte_timer_hjælpemidler.id!,
-            htmlText: "Hvis du får bevilget studiestøttetimer, kan du fx arbejde med udvikling af strategier til at styrker og understøtte dit faglige overblik og struktur.\nDu kan få hjælp til at bruge forskellige planlægningsværktøjer, som du kan bruge, når du skal skrive opgaver eller i gang med større projekter.\n\nDu kan tilgå yderligere informationer omkring støttetimer og hjælpemidler.",
-            buttonLinkURL: "https://www.spsu.dk/for-elever-og-studerende/leverandører%20af%20støtte",
+            htmlText: "Hvis du får bevilget studiestøttetimer, kan du fx arbejde med udvikling af strategier til at styrker og understøtte dit faglige overblik og struktur. Du kan få hjælp til at bruge forskellige planlægningsværktøjer, som du kan bruge, når du skal skrive opgaver eller i gang med større projekter.\n\nDu kan tilgå yderligere informationer omkring støttetimer og hjælpemidler.",
+            buttonLinkURL: "https://www.spsu.dk/for-sps-ansvarlige/videregaaende-uddannelser/psykiske-funktionsnedsaettelser/korte-og-mellemlange-videregaaende-uddannelser/stoetteformer/stoettetimer-ved-faglig-stoettelaerer",
             swipeableTexts: nil,
             videoLinkURLs: nil
         )
@@ -861,7 +889,7 @@ struct SubjectController: RouteCollection {
             id: UUID(),
             subjectID: videregåendeuddannelse_praktik.id!,
             htmlText: "Er der obligatoriske praktikperioder under din uddannelse, så giver dette dig også ret til SPS under praktikken, selvom praktikperioden evt. Ikke er SU berettiget.\n\nDu kan tilgå yderligere informationer omkring praktik.",
-            buttonLinkURL: "https://www.spsu.dk/for-elever-og-studerende/sps-naar-du-er-studerende-paa-en-videregaaende-uddannelse/sps-naar-du-er-studerende-paa-en-videregaaende-uddannelse",
+            buttonLinkURL: "https://www.spsu.dk/for-sps-ansvarlige/administration-af-sps/sps-paa-studieture-og-i-praktik",
             swipeableTexts: nil,
             videoLinkURLs: nil
         )
@@ -869,7 +897,7 @@ struct SubjectController: RouteCollection {
         let videregåendeuddannelse_handicap_tillæg_detalje = Detail(
             id: UUID(),
             subjectID: videregåendeuddannelse_handicap_tillæg.id!,
-            htmlText: "Læser du på en dansk erhvervsuddannelse og har en varig psykisk eller fysisk funktionsnedsættelse, der giver dig meget betydelige begrænsninger i evnen til at påtage dig et erhvervsarbejde, så kan du søge om at få et handicaptillæg ved siden af din SU.\nDu kan som noget nyt søge handicaptillæg i de måneder, hvor du modtager SU (grundforløbende og øvrige forløb med SU).\n\nDu kan tilgå yderligere informationer omkring handicaptillæg.",
+            htmlText: "Læser du på en dansk erhvervsuddannelse og har en varig psykisk eller fysisk funktionsnedsættelse, der giver dig meget betydelige begrænsninger i evnen til at påtage dig et erhvervsarbejde, så kan du søge om at få et handicaptillæg ved siden af din SU. Du kan som noget nyt søge handicaptillæg i de måneder, hvor du modtager SU (grundforløbende og øvrige forløb med SU).\n\nDu kan tilgå yderligere informationer omkring handicaptillæg.",
             buttonLinkURL: "https://www.su.dk/su/saerlig-stoette-til-foraeldre-handicappede-mv/handicaptillaeg/",
             swipeableTexts: nil,
             videoLinkURLs: nil
@@ -878,7 +906,7 @@ struct SubjectController: RouteCollection {
         let videregåendeuddannelse_revalidering_detalje = Detail(
             id: UUID(),
             subjectID: videregåendeuddannelse_revalidering.id!,
-            htmlText: "Revalidering er både erhvervsrettede aktiviteter og økonomisk hjælp.\nRevalidering kan ske enten i form for revalidering eller når det erhvervsmæssige sigte er afklaret dvs. revalidering efter en særlig jobplan.\nAktiviteterne kan fx være arbejdsprøvning, uddannelse, optræning hos private eller offentlige arbejdsgivere eller hjælp til etablering af selvstændig virksomhed.\nDen økonomiske hjælp kan være kontanthjælp eller revalideringsydelse.\nFor at kunne få revalidering er det en forudsætning, at man har begrænsninger i arbejdsevnen, og at der ikke er andre tilbud som kan hjælpe en med at få tilknytning til arbejdsmarkedet.\n\nDu kan tilgå yderligere informationer omkring revalidering.",
+            htmlText: "Revalidering er både erhvervsrettede aktiviteter og økonomisk hjælp. Aktiviteterne kan fx være arbejdsprøvning, uddannelse, optræning hos private eller offentlige arbejdsgivere eller hjælp til etablering af selvstændig virksomhed. Den økonomiske hjælp kan være kontanthjælp eller revalideringsydelse. For at kunne få revalidering er det en forudsætning, at man har begrænsninger i arbejdsevnen, og at der ikke er andre tilbud som kan hjælpe en med at få tilknytning til arbejdsmarkedet.\n\nDu kan tilgå yderligere informationer omkring revalidering.",
             buttonLinkURL: "https://star.dk/da/indsatser-og-ordninger/indsatser-ved-sygdom-nedslidning-mv/revalidering/",
             swipeableTexts: nil,
             videoLinkURLs: nil
