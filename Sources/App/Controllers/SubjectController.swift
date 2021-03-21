@@ -1,6 +1,12 @@
 import Fluent
 import Vapor
 
+enum SubjectType {
+    case student
+    case counselor
+    case employee
+}
+
 struct SubjectController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let subjects = routes.grouped("subjects")
@@ -51,7 +57,7 @@ struct SubjectController: RouteCollection {
         )
         
         return studievejleder.save(on: req.db).map { studievejleder }.flatMap { _ in
-            return self.generateStøtteUnderUddannelse(req: req, color: .lightSteelBlue, subject: studievejleder).flatMap { _ in
+            return self.generateStøtteUnderUddannelse(req: req, color: .lightSteelBlue, subject: studievejleder, type: .counselor).flatMap { _ in
                 return self.generateStudievejlederGoderåd(req: req, studievejleder: studievejleder)
             }
         }
@@ -67,7 +73,7 @@ struct SubjectController: RouteCollection {
         )
         
         return studerende.save(on: req.db).map { studerende }.flatMap { _ in
-            return self.generateStøtteUnderUddannelse(req: req, color: .lightGreen, subject: studerende).flatMap { _ in
+            return self.generateStøtteUnderUddannelse(req: req, color: .lightGreen, subject: studerende, type: .student).flatMap { _ in
                 return self.generateStuderendeGoderåd(req: req, studerende: studerende).flatMap { _ in
                     return self.generateStuderendeMindfulness(req: req, studerende: studerende).flatMap { _ in
                         return self.generateStuderendeChatforum(req: req, studerende: studerende)
@@ -97,7 +103,7 @@ struct SubjectController: RouteCollection {
         }
     }
     
-    private func generateStøtteUnderUddannelse(req: Request, color: ColorPalette, subject: Subject) -> EventLoopFuture<Subject> {
+    private func generateStøtteUnderUddannelse(req: Request, color: ColorPalette, subject: Subject, type: SubjectType) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try subject.requireID()
@@ -114,9 +120,9 @@ struct SubjectController: RouteCollection {
         )
         
         return støtte_under_uddannelse.save(on: req.db).map { støtte_under_uddannelse }.flatMap { _ in
-            return self.generateStøtteUnderUddannelseGymnasieUddannelse(req: req, color: color, støtte_under_uddannelse: støtte_under_uddannelse).flatMap { _ in
-                return self.generateStøtteUnderUddannelseErhvervsUddannelse(req: req, color: color, støtte_under_uddannelse: støtte_under_uddannelse).flatMap { _ in
-                    return self.generateStøtteUnderUddannelseVideregåendeUddannelse(req: req, color: color, støtte_under_uddannelse: støtte_under_uddannelse)
+            return self.generateStøtteUnderUddannelseGymnasieUddannelse(req: req, color: color, støtte_under_uddannelse: støtte_under_uddannelse, type: type).flatMap { _ in
+                return self.generateStøtteUnderUddannelseErhvervsUddannelse(req: req, color: color, støtte_under_uddannelse: støtte_under_uddannelse, type: type).flatMap { _ in
+                    return self.generateStøtteUnderUddannelseVideregåendeUddannelse(req: req, color: color, støtte_under_uddannelse: støtte_under_uddannelse, type: type)
                 }
             }
         }
@@ -436,7 +442,7 @@ struct SubjectController: RouteCollection {
         }
     }
     
-    private func generateStøtteUnderUddannelseErhvervsUddannelse(req: Request, color: ColorPalette, støtte_under_uddannelse: Subject) -> EventLoopFuture<Subject> {
+    private func generateStøtteUnderUddannelseErhvervsUddannelse(req: Request, color: ColorPalette, støtte_under_uddannelse: Subject, type: SubjectType) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try støtte_under_uddannelse.requireID()
@@ -453,11 +459,11 @@ struct SubjectController: RouteCollection {
         )
         
         return erhvervsuddannelse.save(on: req.db).map { erhvervsuddannelse }.flatMap { s -> EventLoopFuture<Subject> in
-            return self.generateStudievejerStøtteUnderUddannelseErhvervsUddannelse(req: req, color: color, erhvervsuddannelse: erhvervsuddannelse)
+            return self.generateStøtteUnderUddannelseErhvervsUddannelse(req: req, color: color, erhvervsuddannelse: erhvervsuddannelse, type: type)
         }
     }
     
-    private func generateStøtteUnderUddannelseVideregåendeUddannelse(req: Request, color: ColorPalette, støtte_under_uddannelse: Subject) -> EventLoopFuture<Subject> {
+    private func generateStøtteUnderUddannelseVideregåendeUddannelse(req: Request, color: ColorPalette, støtte_under_uddannelse: Subject, type: SubjectType) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try støtte_under_uddannelse.requireID()
@@ -474,11 +480,11 @@ struct SubjectController: RouteCollection {
         )
         
         return videregåendeuddannelse.save(on: req.db).map { videregåendeuddannelse }.flatMap { s -> EventLoopFuture<Subject> in
-            return self.generateStøtteUnderUddannelseVideregåendeUddannelse(req: req, color: color, videregåendeuddannelse: videregåendeuddannelse)
+            return self.generateStøtteUnderUddannelseVideregåendeUddannelse(req: req, color: color, videregåendeuddannelse: videregåendeuddannelse, type: type)
         }
     }
     
-    private func generateStøtteUnderUddannelseGymnasieUddannelse(req: Request, color: ColorPalette, støtte_under_uddannelse: Subject) -> EventLoopFuture<Subject> {
+    private func generateStøtteUnderUddannelseGymnasieUddannelse(req: Request, color: ColorPalette, støtte_under_uddannelse: Subject, type: SubjectType) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try støtte_under_uddannelse.requireID()
@@ -495,11 +501,11 @@ struct SubjectController: RouteCollection {
         )
         
         return gymnasieuddannelse.save(on: req.db).map { gymnasieuddannelse }.flatMap { s -> EventLoopFuture<Subject> in
-            return self.generateStøtteUnderUddannelseGymnasieUddannelse(req: req, color: color, gymnasieuddannelse: gymnasieuddannelse)
+            return self.generateStøtteUnderUddannelseGymnasieUddannelse(req: req, color: color, gymnasieuddannelse: gymnasieuddannelse, type: type)
         }
     }
     
-    private func generateStøtteUnderUddannelseGymnasieUddannelse(req: Request, color: ColorPalette, gymnasieuddannelse: Subject) -> EventLoopFuture<Subject> {
+    private func generateStøtteUnderUddannelseGymnasieUddannelse(req: Request, color: ColorPalette, gymnasieuddannelse: Subject, type: SubjectType) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try gymnasieuddannelse.requireID()
@@ -629,7 +635,7 @@ struct SubjectController: RouteCollection {
         }
     }
     
-    private func generateStudievejerStøtteUnderUddannelseErhvervsUddannelse(req: Request, color: ColorPalette, erhvervsuddannelse: Subject) -> EventLoopFuture<Subject> {
+    private func generateStøtteUnderUddannelseErhvervsUddannelse(req: Request, color: ColorPalette, erhvervsuddannelse: Subject, type: SubjectType) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try erhvervsuddannelse.requireID()
@@ -685,13 +691,7 @@ struct SubjectController: RouteCollection {
             backgroundColor: color.hexColor
         )
         
-        let erhvervsuddannelse_gode_råd_til_handicap_tillægsansøgnining = Subject(
-            id: UUID(),
-            parentID: parentID,
-            text: "Gode råd til handicaptillægsansøgning",
-            iconURL: iconPath(name: "ic_internship"),
-            backgroundColor: color.hexColor
-        )
+        let erhvervsuddannelse_gode_råde_til_handicap_tillægsansøgning = generateGodeRådTilHandicapTillægsansøgningSubject(parentID: parentID, color: color)
         
         let erhvervsuddannelse_praktik = Subject(
             id: UUID(),
@@ -755,22 +755,7 @@ struct SubjectController: RouteCollection {
             videoLinkURLs: nil
         )
         
-        let erhvervsuddannelse_gode_råd_til_handicap_tillægsansøgnining_detalje = Detail(
-            id: UUID(),
-            subjectID: erhvervsuddannelse_gode_råd_til_handicap_tillægsansøgnining.id!,
-            htmlText: nil,
-            buttonLinkURL: nil,
-            swipeableTexts: [
-                "Vigtigt at den lægefaglige dokumentation som vedhæftes ansøgningen ikke er mere end 6 måneder gammel. Er den det, så sørg for at få en ny lægeerklæring fra din læge inden du ansøger.",
-                "Hvis du er i behandling i det private så være opmærksom på at det kan være dyrt at få lavet en lægeerklæring.",
-                "Hvis du er i behandling ved det offentlige er det styrelsen selv der indhenter den, samt betaler for den.",
-                "Skriv en god og motiveret ansøgning om hvorfor du mener at du er berettiget til handicaptillæg ved siden af dit studie.",
-                "Vedhæft tidligere erfaring med arbejde, lønsedler, som viser at du har måtte opsige dit arbejde efter kort tid og derved ikke har kunne have et studiejob ved siden af studiet.",
-                "Vedhæft alt hvad du har angående speciallægeudtagelser, journalnotater mm, som beskriver din diagnose/diagnoser. Hellere for meget end for lidt. Har du billeder fx fra scanninger, eller egne billeder der viser din diagnose så vedhæft gerne disse også.",
-                "Vedhæft bevis for tidligere SPS støtte – fx hvis du har fået tilkendt SPS støtte i gymnasiet eller lign."
-            ],
-            videoLinkURLs: nil
-        )
+        let erhvervsuddannelse_gode_råde_til_handicap_tillægsansøgning_detalje = generateGodeRådTilHandicapTillægsansøgniningDetalje(subjectID: erhvervsuddannelse_gode_råde_til_handicap_tillægsansøgning.id!)
         
         let erhvervsuddannelse_praktik_detalje = Detail(
             id: UUID(),
@@ -811,15 +796,19 @@ struct SubjectController: RouteCollection {
         let _ = erhvervsuddannelse_handicap_tillæg.save(on: req.db).map { erhvervsuddannelse_handicap_tillæg }.flatMap { s -> EventLoopFuture<Subject> in
             return erhvervsuddannelse_handicap_tillæg_detalje.save(on: req.db).map { s }
         }
-        let _ = erhvervsuddannelse_gode_råd_til_handicap_tillægsansøgnining.save(on: req.db).map { erhvervsuddannelse_gode_råd_til_handicap_tillægsansøgnining }.flatMap { s -> EventLoopFuture<Subject> in
-            return erhvervsuddannelse_gode_råd_til_handicap_tillægsansøgnining_detalje.save(on: req.db).map { s }
+        
+        if type == .student {
+            let _ = erhvervsuddannelse_gode_råde_til_handicap_tillægsansøgning.save(on: req.db).map { erhvervsuddannelse_gode_råde_til_handicap_tillægsansøgning }.flatMap { s -> EventLoopFuture<Subject> in
+                return erhvervsuddannelse_gode_råde_til_handicap_tillægsansøgning_detalje.save(on: req.db).map { s }
+            }
         }
+        
         return erhvervsuddannelse_praktik.save(on: req.db).map { erhvervsuddannelse_praktik }.flatMap { s -> EventLoopFuture<Subject> in
             return erhvervsuddannelse_praktik_detalje.save(on: req.db).map { s }
         }
     }
     
-    private func generateStøtteUnderUddannelseVideregåendeUddannelse(req: Request, color: ColorPalette, videregåendeuddannelse: Subject) -> EventLoopFuture<Subject> {
+    private func generateStøtteUnderUddannelseVideregåendeUddannelse(req: Request, color: ColorPalette, videregåendeuddannelse: Subject, type: SubjectType) -> EventLoopFuture<Subject> {
         var parentID: UUID? = nil
         do {
             parentID = try videregåendeuddannelse.requireID()
@@ -858,6 +847,8 @@ struct SubjectController: RouteCollection {
             iconURL: iconPath(name: "ic_handicap_supplement"),
             backgroundColor: color.hexColor
         )
+        
+        let videregåendeuddannelse_gode_råd_til_handicap_tillægsansøgnining = generateGodeRådTilHandicapTillægsansøgningSubject(parentID: parentID, color: color)
         
         let videregåendeuddannelse_revalidering = Subject(
              id: UUID(),
@@ -903,6 +894,8 @@ struct SubjectController: RouteCollection {
             videoLinkURLs: nil
         )
         
+        let videregåendeuddannelse_gode_råd_til_handicap_tillægsansøgnining_detalje = generateGodeRådTilHandicapTillægsansøgniningDetalje(subjectID: videregåendeuddannelse_gode_råd_til_handicap_tillægsansøgnining.id!)
+        
         let videregåendeuddannelse_revalidering_detalje = Detail(
             id: UUID(),
             subjectID: videregåendeuddannelse_revalidering.id!,
@@ -924,8 +917,44 @@ struct SubjectController: RouteCollection {
         let _ = videregåendeuddannelse_handicap_tillæg.save(on: req.db).map { videregåendeuddannelse_handicap_tillæg }.flatMap { s -> EventLoopFuture<Subject> in
             return videregåendeuddannelse_handicap_tillæg_detalje.save(on: req.db).map { s }
         }
+        
+        if type == .student {
+            let _ = videregåendeuddannelse_gode_råd_til_handicap_tillægsansøgnining.save(on: req.db).map { videregåendeuddannelse_gode_råd_til_handicap_tillægsansøgnining }.flatMap { s -> EventLoopFuture<Subject> in
+                return videregåendeuddannelse_gode_råd_til_handicap_tillægsansøgnining_detalje.save(on: req.db).map { s }
+            }
+        }
+        
         return videregåendeuddannelse_revalidering.save(on: req.db).map { videregåendeuddannelse_revalidering }.flatMap { s -> EventLoopFuture<Subject> in
             return videregåendeuddannelse_revalidering_detalje.save(on: req.db).map { s }
         }
+    }
+    
+    private func generateGodeRådTilHandicapTillægsansøgniningDetalje(subjectID: UUID) -> Detail {
+        Detail(
+            id: UUID(),
+            subjectID: subjectID,
+            htmlText: nil,
+            buttonLinkURL: nil,
+            swipeableTexts: [
+                "Vigtigt at den lægefaglige dokumentation som vedhæftes ansøgningen ikke er mere end 6 måneder gammel. Er den det, så sørg for at få en ny lægeerklæring fra din læge inden du ansøger.",
+                "Hvis du er i behandling i det private så være opmærksom på at det kan være dyrt at få lavet en lægeerklæring.",
+                "Hvis du er i behandling ved det offentlige er det styrelsen selv der indhenter den, samt betaler for den.",
+                "Skriv en god og motiveret ansøgning om hvorfor du mener at du er berettiget til handicaptillæg ved siden af dit studie.",
+                "Vedhæft tidligere erfaring med arbejde, lønsedler, som viser at du har måtte opsige dit arbejde efter kort tid og derved ikke har kunne have et studiejob ved siden af studiet.",
+                "Vedhæft alt hvad du har angående speciallægeudtagelser, journalnotater mm, som beskriver din diagnose/diagnoser. Hellere for meget end for lidt. Har du billeder fx fra scanninger, eller egne billeder der viser din diagnose så vedhæft gerne disse også.",
+                "Vedhæft bevis for tidligere SPS støtte – fx hvis du har fået tilkendt SPS støtte i gymnasiet eller lign."
+            ],
+            videoLinkURLs: nil
+        )
+    }
+    
+    private func generateGodeRådTilHandicapTillægsansøgningSubject(parentID: UUID?, color: ColorPalette) -> Subject {
+        Subject(
+            id: UUID(),
+            parentID: parentID,
+            text: "Gode råd til handicaptillægsansøgning",
+            iconURL: iconPath(name: "ic_good_advice"),
+            backgroundColor: color.hexColor
+        )
     }
 }
