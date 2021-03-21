@@ -39,6 +39,8 @@ struct BlockedDeviceController: RouteCollection, ApiController {
                 $0.$comments.query(on: req.db)
                 .join(BlockedDevice.self, on: \Comment.$deviceID == \BlockedDevice.$blockedDeviceID)
                 .filter(BlockedDevice.self, \BlockedDevice.$deviceID == appHeaders.deviceID)
+                .with(\.$post)
+                .sort(\.$createdAt)
                 .all()
             }
         
@@ -48,6 +50,8 @@ struct BlockedDeviceController: RouteCollection, ApiController {
                 $0.$comments.query(on: req.db)
                 .join(BlockedDevice.self, on: \Comment.$deviceID == \BlockedDevice.$deviceID)
                 .filter(BlockedDevice.self, \BlockedDevice.$blockedDeviceID == appHeaders.deviceID)
+                .with(\.$post)
+                .sort(\.$createdAt)
                 .all()
             }
         
