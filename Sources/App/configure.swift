@@ -20,6 +20,7 @@ public func configure(_ app: Application) throws {
     // Tables
     app.migrations.add(CreateSubject())
     app.migrations.add(CreateDetail())
+    app.migrations.add(CreateChannel())
     app.migrations.add(CreatePost())
     app.migrations.add(CreateComment())
     app.migrations.add(CreateAllowedDevice())
@@ -27,7 +28,6 @@ public func configure(_ app: Application) throws {
     app.migrations.add(CreatePushDevice())
     app.migrations.add(CreateNotificationEvent())
     app.migrations.add(CreateNotification())
-    app.migrations.add(CreateChannel())
     app.migrations.add(CreatePostFilter())
     app.migrations.add(CreateBlockedDevice())
 
