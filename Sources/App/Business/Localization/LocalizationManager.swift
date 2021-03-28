@@ -1,3 +1,3 @@
 struct LocalizationManager {
-    static let newCommentOnPost = "You've a new comment on your post"
+    static let newCommentOnPost = "Du har en ny kommentar på dit opslag"
 }
