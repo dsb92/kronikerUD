@@ -19,7 +19,7 @@ extension PostManagable {
     func createPost(req: Request, channelID: UUID?) throws -> EventLoopFuture<Post.Output> {
         let appHeaders = try req.getAppHeaders()
         let input = try req.content.decode(Post.Input.self)
-        let post = Post(channelID: channelID, deviceID: appHeaders.deviceID, text: input.text, numberOfComments: 0)
+        let post = Post(channelID: channelID, deviceID: appHeaders.deviceID, text: input.text, numberOfComments: 0, subjectText: input.subjectText)
         return post.save(on: req.db).flatMap {
             PushDevice.find(appHeaders.deviceID, on: req.db)
                 .flatMap { device in
@@ -37,7 +37,9 @@ extension PostManagable {
                         return channel.save(on: req.db)
                     }
                 }
-                .map { Post.Output(id: post.id, deviceID: post.deviceID, text: post.text, numberOfComments: post.numberOfComments, createdAt: post.createdAt, updatedAt: post.updatedAt, channelID: channelID) }
+                .map {
+                    Post.Output(id: post.id, deviceID: post.deviceID, text: post.text, numberOfComments: post.numberOfComments, createdAt: post.createdAt, updatedAt: post.updatedAt, channelID: channelID, subjectText: post.subjectText)
+                }
         }
     }
 }

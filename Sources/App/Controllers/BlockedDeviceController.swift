@@ -1,6 +1,11 @@
 import Vapor
 import Fluent
 
+struct CheckForBlockedPostsResponse: Content {
+    let blockedByYou: [Post]
+    let blockedFromYou: [Post]
+}
+
 struct CheckForBlockedCommentsResponse: Content {
     let blockedByYou: [Comment]
     let blockedFromYou: [Comment]
@@ -12,7 +17,7 @@ struct BlockedDeviceController: RouteCollection, ApiController {
         setup(routes: routes, on: "blockedDevices")
         
         let blockedDevices = routes.grouped("blockedDevices")
-        
+        blockedDevices.get("posts", ":id", use: getBlockedPosts)
         blockedDevices.get("posts", ":id", "comments", use: getBlockedComments)
     }
     
@@ -25,6 +30,33 @@ struct BlockedDeviceController: RouteCollection, ApiController {
             throw Abort(.badRequest, reason: "You cannot block yourself")
         }
         return model.save(on: req.db).map { _ in model.output }
+    }
+    
+    func getBlockedPosts(req: Request) throws -> EventLoopFuture<CheckForBlockedPostsResponse> {
+        let appHeaders = try req.getAppHeaders()
+        guard let id = req.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest)
+        }
+        
+        let postsBlockedByYou = Post.query(on: req.db)
+            .filter(\.$id == id)
+            .join(BlockedDevice.self, on: \Post.$deviceID == \BlockedDevice.$blockedDeviceID)
+            .filter(BlockedDevice.self, \BlockedDevice.$deviceID == appHeaders.deviceID)
+            .sort(\.$createdAt)
+            .all()
+        
+        let postsBlockedFromYou = Post.query(on: req.db)
+            .filter(\.$id == id)
+            .join(BlockedDevice.self, on: \Post.$deviceID == \BlockedDevice.$deviceID)
+            .filter(BlockedDevice.self, \BlockedDevice.$blockedDeviceID == appHeaders.deviceID)
+            .sort(\.$createdAt)
+            .all()
+        
+        return postsBlockedByYou.flatMap { blockedByYou in
+            return postsBlockedFromYou.flatMap { blockedFromYou in
+                return req.eventLoop.makeSucceededFuture(CheckForBlockedPostsResponse(blockedByYou: blockedByYou, blockedFromYou: blockedFromYou))
+            }
+        }
     }
     
     func getBlockedComments(req: Request) throws -> EventLoopFuture<CheckForBlockedCommentsResponse> {

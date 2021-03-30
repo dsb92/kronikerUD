@@ -30,6 +30,9 @@ public func configure(_ app: Application) throws {
     app.migrations.add(CreateNotification())
     app.migrations.add(CreatePostFilter())
     app.migrations.add(CreateBlockedDevice())
+    
+    // Migrations
+    app.migrations.add(PostAddSubjectText())
 
     // Middleware
     app.middleware.use(SecretMiddleware(username: Environment.get("BASIC_AUTH_USER") ?? "", password: Environment.get("BASIC_AUTH_PASS") ?? ""))

@@ -1,12 +1,12 @@
 import Fluent
 import Vapor
 
-final class Channel: Model, Content {
-    struct Input: Content {
+final class Channel: ApiModel {
+    struct _Input: Content {
         let text: String
     }
 
-    struct Output: Content {
+    struct _Output: Content {
         var id: UUID?
         let deviceID: UUID
         let text: String
@@ -14,6 +14,9 @@ final class Channel: Model, Content {
         var createdAt: Date?
         var updatedAt: Date?
     }
+    
+    typealias Input = _Input
+    typealias Output = _Output
     
     static let schema = "channels"
     
@@ -47,5 +50,22 @@ final class Channel: Model, Content {
         self.numberOfPosts = numberOfPosts
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+    }
+    
+    // MARK: - api
+    
+    init(_ input: Input, _ headers: HttpHeaders) throws {
+        self.text = input.text
+        self.deviceID = headers.deviceID
+        self.numberOfPosts = 0
+    }
+    
+    func update(_ input: Input, _ headers: HttpHeaders) throws {
+        self.text = input.text
+        self.deviceID = headers.deviceID
+    }
+    
+    var output: Output {
+        .init(id: self.id, deviceID: self.deviceID, text: self.text, numberOfPosts: self.numberOfPosts, createdAt: self.createdAt, updatedAt: self.updatedAt)
     }
 }

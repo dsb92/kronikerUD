@@ -1,13 +1,15 @@
 import Fluent
 import Vapor
 
-final class Post: Model, Content {
-    struct Input: Content {
+final class Post: ApiModel {
+    
+    struct _Input: Content {
         let text: String
         var channelID: UUID?
+        var subjectText: String?
     }
 
-    struct Output: Content {
+    struct _Output: Content {
         var id: UUID?
         let deviceID: UUID
         let text: String
@@ -15,7 +17,11 @@ final class Post: Model, Content {
         var createdAt: Date?
         var updatedAt: Date?
         var channelID: UUID?
+        var subjectText: String?
     }
+    
+    typealias Input = _Input
+    typealias Output = _Output
     
     static let schema = "posts"
     
@@ -43,15 +49,40 @@ final class Post: Model, Content {
     @OptionalParent(key: "channel_id")
     var channel: Channel?
     
+    @OptionalField(key: "subject_text")
+    var subjectText: String?
+    
     init() { }
 
-    init(id: UUID? = nil, channelID: UUID? = nil, deviceID: UUID, text: String, numberOfComments: Int, createdAt: Date? = nil, updatedAt: Date? = nil) {
+    init(id: UUID? = nil, channelID: UUID? = nil, deviceID: UUID, text: String, numberOfComments: Int, subjectText: String? = nil, createdAt: Date? = nil, updatedAt: Date? = nil) {
         self.id = id
         self.$channel.id = channelID
         self.deviceID = deviceID
         self.text = text
         self.numberOfComments = numberOfComments
+        self.subjectText = subjectText
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+    }
+    
+    // MARK: - api
+    
+    init(_ input: Input, _ headers: HttpHeaders) throws {
+        self.text = input.text
+        self.$channel.id = input.channelID
+        self.deviceID = headers.deviceID
+        self.numberOfComments = 0
+        self.subjectText = input.subjectText
+    }
+    
+    func update(_ input: Input, _ headers: HttpHeaders) throws {
+        self.text = input.text
+        self.$channel.id = input.channelID
+        self.deviceID = headers.deviceID
+        self.subjectText = input.subjectText
+    }
+    
+    var output: Output {
+        .init(id: self.id, deviceID: self.deviceID, text: self.text, numberOfComments: self.numberOfComments, createdAt: self.createdAt, updatedAt: self.updatedAt, channelID: self.$channel.id, subjectText: self.subjectText)
     }
 }
