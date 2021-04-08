@@ -45,15 +45,4 @@ struct ChannelController: RouteCollection, PostManagable, BlockingManageable, Ap
         }
         return try createPost(req: req, channelID: channelID)
     }
-    
-    func deleteChannel(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        guard let id = req.parameters.get("id", as: UUID.self) else {
-            throw Abort(.badRequest, reason: "Missing id in path")
-        }
-        return Channel
-            .find(id, on: req.db)
-            .unwrap(or: Abort(.notFound, reason: "Channel with id \(id) not found"))
-            .flatMap { $0.delete(on: req.db) }
-            .map { .noContent }
-    }
 }

@@ -68,7 +68,7 @@ extension ApiController {
     }
     
     func delete(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
-        try self.find(req).flatMap { $0.delete(on: req.db) }.map { .ok }
+        try self.find(req).flatMap { $0.delete(on: req.db) }.map { .noContent }
     }
     
     @discardableResult
