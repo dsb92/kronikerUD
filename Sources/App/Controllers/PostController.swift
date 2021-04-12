@@ -104,15 +104,26 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
         guard let id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Missing id in path")
         }
+        let appHeaders = try req.getAppHeaders()
         return Comment
             .find(id, on: req.db)
             .unwrap(or: Abort(.notFound, reason: "Comment with id \(id) not found"))
             .flatMap { comment in
                 comment.$post.query(on: req.db).first().unwrap(or: Abort(.notFound, reason: "Comment doesn't belong to a post anymore")).flatMap { post in
-                    return comment.delete(on: req.db).flatMap {
-                        deleteComment(numberOfComments: &post.numberOfComments)
-                        return post.save(on: req.db)
-                    }
+                    // Delete associate filters
+                    PostFilter.query(on: req.db)
+                        .filter(\.$postID == post.id!)
+                        .filter(\.$deviceID == appHeaders.deviceID)
+                        .filter(\.$postFilterType == .myComments)
+                        .delete()
+                        .flatMap {
+                            // Delete comment
+                            return comment.delete(on: req.db).flatMap {
+                                // Update numberOfComments
+                                deleteComment(numberOfComments: &post.numberOfComments)
+                                return post.save(on: req.db)
+                            }
+                        }
                 }
             }
             .map { .noContent }
@@ -122,14 +133,23 @@ struct PostController: RouteCollection, PushManageable, CommentsManagable, PostM
         guard let id = req.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest, reason: "Missing id in path")
         }
+        let appHeaders = try req.getAppHeaders()
         return Post
             .find(id, on: req.db)
             .unwrap(or: Abort(.notFound, reason: "Post with id \(id) not found"))
             .flatMap { post in
                 // Delete associated notification events
-                NotificationEvent.query(on: req.db).filter(\.$eventID == post.id!).delete().flatMap {
+                NotificationEvent.query(on: req.db)
+                    .filter(\.$eventID == post.id!)
+                    .delete()
+                    .flatMap {
                     // Delete associate filters
-                    PostFilter.query(on: req.db).filter(\.$postID == post.id!).delete().flatMap {
+                    PostFilter.query(on: req.db)
+                        .filter(\.$postID == post.id!)
+                        .filter(\.$deviceID == appHeaders.deviceID)
+                        .filter(\.$postFilterType == .myPost)
+                        .delete()
+                        .flatMap {
                         // Delete post
                         post.delete(on: req.db).flatMap {
                             // Update numberOfPosts if post belongs to a channel
